@@ -21,3 +21,7 @@
 | 17 | 2026-11-05 | School name is fictional and set in `src/config/game.config.json` | Must be easy to change |
 | 18 | 2026-11-05 | First bell is 8:00 AM | User input |
 | 19 | 2026-11-05 | Tyler's real home address is not used | Privacy |
+| 20 | 2026-11-05 | Audience is friends only; site marked noindex | User input |
+| 21 | 2026-11-05 | Amanda knows she is in the game | Confirmed by user |
+| 22 | 2026-11-05 | Tyler drives a marked patrol car with generic markings | User choice; avoids real agency insignia |
+| 23 | 2026-11-05 | MVP includes music and sound effects (original or CC0 chiptune) | User request |

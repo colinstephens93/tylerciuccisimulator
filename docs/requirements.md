@@ -1,6 +1,6 @@
 # Requirements
 
-Version 0.3 (draft) - 2026-11-05
+Version 0.4 (draft) - 2026-11-05
 
 ## 1. Vision
 
@@ -65,11 +65,19 @@ The game alternates between walking mode and driving mode.
 - Clock starts at 7:00 AM (configurable).
 
 ### Scene 2 - Drive to Wawa (driving)
+- Vehicle: a **marked patrol car** (see "Patrol car" below).
 - Top-down, vertically scrolling road.
 - Controls: tap/hold left or right half of the screen to steer; desktop uses arrow keys / A-D.
 - Hazards: civilian traffic, potholes, a slow pickup truck, a school bus.
 - Collisions cost time; they never end the game.
 - End: pull into the Wawa lot.
+
+### Patrol car
+
+- Pixel-art marked patrol car: dark body with white doors, "SHERIFF" lettering, roof light bar, push bumper.
+- Generic markings only: no real agency seal, unit number, or plate. Livery colors and door text are set in the config file.
+- **Lights button (proposed):** Tapping it turns on the light bar and siren, and traffic pulls aside. Using it for a breakfast run is not an emergency, so each use adds an infraction (and possibly an Amanda-style text from "Sarge"). Risk/reward for players who are running late.
+- Light bar flashes on the parked car outside Wawa and the school as an idle detail.
 
 ### Scene 3 - Wawa (walking, then interior)
 - Walk across the parking lot on the map and into the front door.
@@ -151,6 +159,7 @@ All names and tuning values that may change live in one file: `src/config/game.c
   "clockSpeed": 15,
   "favoriteGhostFlavor": "Root Beer",
   "spouseName": "Amanda",
+  "patrolCar": { "doorText": "SHERIFF", "bodyColor": "#1b1f2a", "doorColor": "#f2f2f2" },
   "amandaCallsPerRun": [3, 4]
 }
 ```
@@ -158,15 +167,46 @@ All names and tuning values that may change live in one file: `src/config/game.c
 - "Red Clay High School" and the mascot are placeholders.
 - Every place the school name appears (signs, dialogue, results screen) reads from this file.
 
-## 10. Non-functional requirements
+## 10. Sound and music
+
+All audio is original or CC0 (public domain), in a chiptune style that matches the pixel art.
+
+### Music (looping tracks)
+
+| Track | Where | Feel |
+| --- | --- | --- |
+| Title theme | Title screen | Upbeat, Southern-tinged chiptune |
+| Morning in Lawrenceville | Walking on the town map | Relaxed, light |
+| Patrol | Driving scenes | Faster, driving beat; tempo rises as the clock nears 8:00 |
+| Wawa | Inside the store | Cheerful in-store muzak |
+| Results / Tardy | End screens | Short win jingle and a "wah-wah" fail jingle |
+
+### Sound effects
+
+Footsteps, car door, engine and tire screech, collision bump, horn, siren and light bar, Wawa door chime, kiosk taps, "order ready" call-out, cooler door, can crack and gulp (Ghost Energy), register beep, school bell, Amanda's ringtone and phone vibrate, text-message ding, UI clicks.
+
+### Audio behavior
+
+- Mobile browsers block audio until the first tap, so the title screen has a "Tap to start" that also unlocks sound.
+- Separate toggles for music and sound effects, saved in localStorage.
+- Music ducks (gets quieter) during Amanda's calls.
+- Respect the phone's silent switch where the browser allows it.
+
+### Tools
+
+- Sound effects: jsfxr (browser sound-effect generator, free).
+- Music: BeepBox or similar chiptune tracker, exported to OGG and M4A for cross-browser support.
+- Audio budget: about 2 MB of the 5 MB load limit.
+
+## 11. Non-functional requirements
 
 - **Mobile first:** One-thumb controls; touch targets at least 44 x 44 px.
 - **Performance:** 60 fps on a mid-range phone from the last ~4 years.
 - **Load size:** Under 5 MB on first load.
 - **No accounts, no data collection:** Scores and checkpoints stored only in the browser (localStorage).
-- **Accessibility:** Readable text at phone size, color is never the only signal, sound off by default with a toggle.
+- **Accessibility:** Readable text at phone size, color is never the only signal, music and sound toggles, and on-screen subtitles for all phone calls.
 
-## 11. Technical approach (proposed)
+## 12. Technical approach (proposed)
 
 - **Engine:** Phaser 3 (canvas rendering, pixel-perfect scaling, touch input, scene management, tilemaps).
 - **Maps:** Town map and Wawa interior built as tilemaps (Tiled editor format), so layouts can be edited without code changes.
@@ -175,15 +215,17 @@ All names and tuning values that may change live in one file: `src/config/game.c
 - **Hosting:** GitHub Pages from this repository.
 - **Art pipeline:** Placeholder shapes first, then pixel sprites (Aseprite or similar), at a base resolution of 16x16 or 32x32 tiles scaled up with nearest-neighbor.
 
-## 12. Real people and brands
+## 13. Real people and brands
 
 - The game uses Tyler Ciucci's real name and likeness. Tyler knows about the game.
-- Amanda (Tyler's wife) appears as a voice on the phone. Her jokes stay affectionate; it is worth confirming she is fine with it too.
+- Amanda (Tyler's wife) appears as a voice on the phone. She knows about the game. Her jokes stay affectionate.
+- **Audience: friends only.** The game is shared by link with friends, not promoted publicly.
 - Depiction stays respectful and good-natured.
 - The real school name, badge number, and license plate are not shown unless Tyler approves.
-- Wawa and Ghost Energy are real brands, referenced by name as an homage. Fine for a private, non-commercial fan game; revisit if the game is shared publicly or monetized.
+- Wawa and Ghost Energy are real brands, referenced by name as an homage. Acceptable for a friends-only, non-commercial fan game; revisit if that changes. No real logos are copied; pixel art suggests the look.
+- The GitHub Pages site will be marked `noindex` so it does not show up in search results.
 
-## 13. Out of scope for MVP
+## 14. Out of scope for MVP
 
 - Scenes after arriving at school (hallway patrol, lunch duty, etc.).
 - Real-world GPS / location-based play.
