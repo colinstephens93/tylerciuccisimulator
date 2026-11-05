@@ -25,3 +25,8 @@
 | 21 | 2026-11-05 | Amanda knows she is in the game | Confirmed by user |
 | 22 | 2026-11-05 | Tyler drives a marked patrol car with generic markings | User choice; avoids real agency insignia |
 | 23 | 2026-11-05 | MVP includes music and sound effects (original or CC0 chiptune) | User request |
+| 24 | 2026-11-05 | Clock starts at 7:00 AM | User input |
+| 25 | 2026-11-05 | Any breakfast item counts; each food item is at least 500 calories | User input |
+| 26 | 2026-11-05 | Wawa goals: at least 1,000 calories of food and 300 mg caffeine; each Ghost can is 300 mg | User input |
+| 27 | 2026-11-05 | Under 1,000 calories lowers the score; going over either goal has no penalty | User input |
+| 28 | 2026-11-05 | Language is JavaScript | Default accepted |

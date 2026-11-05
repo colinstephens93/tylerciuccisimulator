@@ -1,6 +1,6 @@
 # Requirements
 
-Version 0.4 (draft) - 2026-11-05
+Version 0.6 - 2026-11-05
 
 ## 1. Vision
 
@@ -82,11 +82,19 @@ The game alternates between walking mode and driving mode.
 ### Scene 3 - Wawa (walking, then interior)
 - Walk across the parking lot on the map and into the front door.
 - Interior is a rendered pixel-art Wawa-style store: entrance, touchscreen ordering kiosks, deli counter, drink coolers, checkout.
-- Tasks, in any order:
-  1. **Breakfast sandwich:** At the kiosk, build a breakfast sandwich (bread, egg, meat, cheese, extras). Wait for the order number to be called at the counter.
-  2. **Ghost Energy:** Walk to the cooler and pick a Ghost Energy flavor.
-  3. **Checkout:** Pay at the register.
-- Ghost Energy flavor: **Root Beer** is Tyler's favorite. Other flavors are in the cooler too; picking Root Beer earns a bonus and a happy reaction.
+- **Wawa goals** (must be checked before leaving the store):
+  - **Food:** at least **1,000 calories** of food.
+  - **Caffeine:** at least **300 mg** of caffeine.
+- **Food menu:** Any breakfast sandwich or breakfast item counts. Every food item on the menu is at least **500 calories**, so two items meet the food goal. Examples: breakfast sandwiches, a breakfast burrito, a breakfast bowl, a breakfast hoagie. Extras (extra meat, extra cheese) add calories.
+- **Drinks:** Each Ghost Energy can has **300 mg** of caffeine (game value; set in config), so one can meets the caffeine goal. Drink calories do not count toward the food goal.
+- **Flow:** Order food at the kiosk and pick it up at the counter when the number is called; grab Ghost Energy from the cooler; pay at the register.
+- **Leaving the store:** A tray/bag HUD shows running totals (for example, "Food 560 / 1,000 cal", "Caffeine 300 / 300 mg"). If a goal is not met when Tyler walks to the door, a prompt asks "Leave anyway?".
+- **Scoring:**
+  - Food under 1,000 calories: lower score (not a fail).
+  - Caffeine under 300 mg: lower score (not a fail).
+  - Over the caffeine goal: no penalty.
+  - Over the calorie goal: no penalty.
+- Calorie and caffeine values for each item live in `src/data/menu.json`. Values are game values, not official nutrition facts.
 - Light flavor: other customers in line, a "your order is ready" call-out.
 - Exit back to the vehicle.
 
@@ -120,7 +128,7 @@ Tyler's wife, Amanda, calls him several times during the run. Each call is a sho
 
 ### Results screen
 - Arrival time vs. first bell.
-- Breakfast and drink collected (bonus for Root Beer Ghost).
+- Wawa goals: calories (target 1,000) and caffeine (target 300 mg); bonus for Root Beer Ghost.
 - Amanda's mood.
 - Collisions and school-zone infractions.
 - A title based on performance (for example: "Hall Monitor", "Campus Legend").
@@ -133,7 +141,8 @@ Tyler's wife, Amanda, calls him several times during the run. Each call is a sho
 | `clock` | In-game time; starts at `startTime` from config, runs at an accelerated rate |
 | `firstBell` | 8:00 AM (from config); Tyler must reach the school door by then |
 | `amandaMood` | Rises or falls with each call; shown on the results screen |
-| `inventory` | Breakfast sandwich (with its build), Ghost Energy (flavor) |
+| `inventory` | Food items (with calories) and Ghost Energy cans (flavor, caffeine) |
+| `calories` / `caffeineMg` | Running totals checked against the Wawa goals |
 | `energy` | Rises after drinking the Ghost Energy; sets up later scenes |
 | `infractions` | Collisions and school-zone speeding |
 | `checkpoint` | Last completed scene, used by "Retry" |
@@ -158,6 +167,9 @@ All names and tuning values that may change live in one file: `src/config/game.c
   "firstBell": "08:00",
   "clockSpeed": 15,
   "favoriteGhostFlavor": "Root Beer",
+  "wawaGoals": { "minCalories": 1000, "minCaffeineMg": 300 },
+  "ghostCaffeineMg": 300,
+  "minCaloriesPerFoodItem": 500,
   "spouseName": "Amanda",
   "patrolCar": { "doorText": "SHERIFF", "bodyColor": "#1b1f2a", "doorColor": "#f2f2f2" },
   "amandaCallsPerRun": [3, 4]
@@ -208,6 +220,7 @@ Footsteps, car door, engine and tire screech, collision bump, horn, siren and li
 
 ## 12. Technical approach (proposed)
 
+- **Language:** JavaScript.
 - **Engine:** Phaser 3 (canvas rendering, pixel-perfect scaling, touch input, scene management, tilemaps).
 - **Maps:** Town map and Wawa interior built as tilemaps (Tiled editor format), so layouts can be edited without code changes.
 - **Real-streets pipeline:** A build script downloads an OSM extract of Lawrenceville (Overpass API), converts roads and areas into a tile grid, and writes a Tiled map. Hand-placed buildings (home, Wawa, school) are added on a separate layer.
