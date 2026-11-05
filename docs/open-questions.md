@@ -2,33 +2,34 @@
 
 Answer these to finalize the MVP. Move answered items to `decisions.md`.
 
+## Setting
+
+1. Which town just outside Atlanta? (Examples: Marietta, Woodstock, Lawrenceville, McDonough, Peachtree City.)
+2. There is no confirmed Wawa in metro Atlanta. OK to place a fictional Wawa in that town as creative license?
+3. Should the town map loosely follow real streets and landmarks (based on OpenStreetMap data), or be a stylized "feels like the town" layout?
+
 ## Character
 
-1. What is the officer's in-game name? Use the real name, a nickname, or a light alias?
-2. What signature traits should show up (catchphrases, appearance, habits, favorite sports team)?
-3. Has the real person agreed to be in the game, and who will the game be shared with?
+4. Has Tyler agreed to be in the game, and who will it be shared with?
+5. Any catchphrases, habits, or running jokes to work in?
+6. Should the reference photo be committed to the repo (only advisable if the repo is private)?
 
 ## Wawa scene
 
-4. What is the officer's "usual" breakfast order (item and customizations)?
-5. Which energy drink and flavor? Real brand names, or parody names?
-6. Should we use the real Wawa name and look, or a recognizable parody (safer if shared widely)?
-7. Should ordering be timed, or relaxed?
+7. Default/favorite breakfast sandwich build, if there is one? (Used for a bonus, not required.)
+8. Favorite Ghost Energy flavor?
+9. Should ordering in the store be timed by the shared clock only, or have its own mini-timer?
 
-## Driving scenes
+## Driving
 
-8. Patrol car, or personal vehicle?
-9. Which Georgia setting: a real town/county, or a generic Georgia suburb?
-10. Should we include Georgia flavor (peach trees, pine trees, kudzu, red clay, humidity, sudden thunderstorms)?
-11. Difficulty: casual (cannot fail) or can the player be late and "lose"?
+10. Marked patrol car or personal vehicle? Color?
 
 ## School
 
-12. Real school name, or fictional?
-13. What time is the first bell?
+11. Real school name, or fictional?
+12. What time is the first bell?
 
 ## Presentation
 
-14. Art style: pixel art, flat cartoon, or something else?
-15. Music and sound effects: wanted for MVP?
-16. JavaScript or TypeScript?
+13. Music and sound effects in the MVP?
+14. JavaScript or TypeScript?
