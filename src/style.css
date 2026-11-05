@@ -31,7 +31,7 @@ button { font: inherit; border: 0; cursor: pointer; }
 .btn small { display: block; font-weight: 500; font-size: 12px; opacity: 0.8; }
 
 /* Floating map labels */
-.label { position: absolute; left: 0; top: 0; background: var(--card); color: var(--ink); padding: 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.label { position: absolute; left: 0; top: 0; will-change: transform; background: var(--card); color: var(--ink); padding: 5px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
 .label.station { background: var(--gold); font-size: 12px; }
 .label.street { background: rgba(20,33,61,0.75); color: #fff; font-weight: 600; font-size: 11px; }
 

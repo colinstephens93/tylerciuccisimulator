@@ -1,7 +1,7 @@
 // Turns places.json (lot centers) into concrete positions: building placement,
 // door, parking spot, and the road vertex used for routing.
 import placesConfig from '../config/places.json';
-import { buildGraph, nearestVertex, route, vert } from './graph.js';
+import { buildGraph, nearestVertex, route, vert, smoothPath, resample } from './graph.js';
 
 // Per-place layout in the building's local frame (+z faces the road).
 const LAYOUT = {
@@ -42,6 +42,7 @@ export function computePlaces(map) {
 export function driveRoute(graph, from, to) {
   const r = route(graph, from.roadV, to.roadV);
   if (!r) return null;
-  const points = [from.park, ...r.points, to.park];
+  // Smooth the corners so the car turns in arcs instead of snapping at each map point.
+  const points = resample(smoothPath([from.park, ...r.points, to.park], 4, 9), 2);
   return { points, roads: r.roads };
 }

@@ -4,10 +4,11 @@ import * as THREE from 'three';
 import { state } from '../state.js';
 import { audio } from '../audio.js';
 import { nextStep, maybeCall, toast } from '../flow.js';
-import { polylineLength, sampleAt } from '../map/graph.js';
+import { polylineLength, sampleAt, turnSpeedCaps } from '../map/graph.js';
+import { DECAL_ORDER, addRibbon } from '../map/cityMesh.js';
 import { makeTrafficCar, makeBeacon, makePerson, makeSchoolZoneSign } from '../engine/models.js';
 import { keys, angleLerp } from '../engine/util.js';
-import { h, $ } from '../ui/dom.js';
+import { h, $, setHTML, setFlag, setClass } from '../ui/dom.js';
 
 const LANES = [1.7, 4.3]; // meters right of the road centerline
 const MAX_SPEED = 38; // m/s in game space; shown as 45 mph
@@ -28,12 +29,14 @@ export class DriveMode {
     const r = g.routes[this.routeKey];
     this.points = r.points;
     this.length = polylineLength(this.points);
+    this.step = this.length / (this.points.length - 1); // points are evenly spaced
+    this.caps = turnSpeedCaps(this.points, MAX_SPEED);
     this.roadNames = r.roads;
     this.s = 0;
     this.lane = 0;
     this.lat = 0;
     this.speed = 0;
-    this.heading = g.car.rotation.y;
+    this.heading = 0; // set from the route below, so the car starts pointed down the road
     this.traffic = [];
     this.oncoming = [];
     this.nextSpawn = 70;
@@ -55,6 +58,7 @@ export class DriveMode {
     this.trigger = toSchool ? 'driveSchool' : 'driveWawa';
     this.destLabel = toSchool ? state.config.schoolName : 'Wawa';
 
+    this.heading = this.poseAt(0, 0).heading;
     this.addRouteLine();
     const end = this.points[this.points.length - 1];
     const beacon = makeBeacon(0x3fa9f5);
@@ -108,20 +112,11 @@ export class DriveMode {
 
   addRouteLine() {
     const pos = [];
-    const pts = this.points;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const [ax, az] = pts[i];
-      const [bx, bz] = pts[i + 1];
-      const len = Math.hypot(bx - ax, bz - az);
-      if (len < 0.01) continue;
-      const nx = (-(bz - az) / len) * 0.9;
-      const nz = ((bx - ax) / len) * 0.9;
-      const y = 0.26;
-      pos.push(ax + nx, y, az + nz, bx - nx, y, bz - nz, bx + nx, y, bz + nz, ax + nx, y, az + nz, ax - nx, y, az - nz, bx - nx, y, bz - nz);
-    }
+    addRibbon(pos, this.points, 0.9, 0.02);
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x3fa9f5, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }));
+    const line = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: 0x5aaee8, depthWrite: false, depthTest: false, side: THREE.DoubleSide }));
+    line.renderOrder = DECAL_ORDER.route;
     this.add(line);
   }
 
@@ -132,9 +127,9 @@ export class DriveMode {
 
   poseAt(s, lat) {
     const p = sampleAt(this.points, Math.max(0, Math.min(this.length, s)));
-    const a = sampleAt(this.points, Math.min(this.length, s + 6));
+    const a = sampleAt(this.points, Math.min(this.length, s + 4));
     const b = sampleAt(this.points, Math.max(0, s - 1));
-    const heading = s + 6 <= this.length ? Math.atan2(a.x - p.x, a.z - p.z) : Math.atan2(p.x - b.x, p.z - b.z);
+    const heading = s + 4 <= this.length ? Math.atan2(a.x - p.x, a.z - p.z) : Math.atan2(p.x - b.x, p.z - b.z);
     const rx = -Math.cos(heading);
     const rz = Math.sin(heading);
     return { x: p.x + rx * lat, z: p.z + rz * lat, heading };
@@ -205,14 +200,14 @@ export class DriveMode {
     this.beacon.userData.animate(dt);
     const lights = this.time < this.lightsUntil;
     g.car.userData.setLights(lights, dt);
-    this.lightsBtn.disabled = this.time < this.lightsReadyAt;
+    setFlag(this.lightsBtn, 'disabled', this.time < this.lightsReadyAt);
 
     if (!this.finished) {
       const braking = this.brakeHeld || keys.has('arrowdown') || keys.has('s') || keys.has(' ');
-      const top = lights ? LIGHTS_SPEED : MAX_SPEED;
+      const top = Math.min(lights ? LIGHTS_SPEED : MAX_SPEED, this.cornerLimit());
       if (braking) this.speed = Math.max(0, this.speed - 30 * dt);
-      else if (this.speed < top) this.speed = Math.min(top, this.speed + 9 * dt);
-      else this.speed = Math.max(top, this.speed - 6 * dt);
+      else if (this.speed < top) this.speed = Math.min(top, this.speed + 13 * dt);
+      else this.speed = Math.max(top, this.speed - 24 * dt); // ease off for corners
       // Ease off at the very end to pull into the spot.
       const remaining = this.length - this.s;
       if (remaining < 40) this.speed = Math.min(this.speed, Math.max(4, remaining * 0.6));
@@ -262,7 +257,7 @@ export class DriveMode {
     // School zone
     const mph = Math.round(this.speed * MPH);
     const inZone = this.zone && this.s >= this.zone.from && this.s <= this.zone.to;
-    this.zoneEl.hidden = !inZone;
+    setFlag(this.zoneEl, 'hidden', !inZone);
     const over = inZone && mph > ZONE_LIMIT_MPH;
     if (over) {
       this.overLimit += dt;
@@ -272,8 +267,8 @@ export class DriveMode {
         toast('Speeding in a school zone! +1 infraction');
       }
     }
-    this.speedo.innerHTML = `${mph} <small>MPH</small>`;
-    this.speedo.classList.toggle('over', !!over);
+    setHTML(this.speedo, `${mph} <small>MPH</small>`);
+    setClass(this.speedo, 'over', !!over);
 
     if (!this.called && this.s > this.length * 0.35) {
       this.called = true;
@@ -290,6 +285,18 @@ export class DriveMode {
       toast(`Arrived at ${this.destLabel}`);
       setTimeout(() => nextStep(), 700);
     }
+  }
+
+  // Fastest speed that still lets the car slow down in time for the corners ahead.
+  cornerLimit() {
+    const DECEL = 22;
+    const i0 = Math.floor(this.s / this.step);
+    let limit = Infinity;
+    for (let k = 0; k < 30 && i0 + k < this.caps.length; k++) {
+      const dist = Math.max(0, (i0 + k) * this.step - this.s);
+      limit = Math.min(limit, Math.sqrt(this.caps[i0 + k] ** 2 + 2 * DECEL * dist));
+    }
+    return limit;
   }
 
   crash(t) {

@@ -15,3 +15,18 @@ export function h(tag, attrs = {}, ...children) {
 }
 
 export const $ = (sel) => document.querySelector(sel);
+
+// Only touch the DOM when a value actually changes. Rewriting text or classes every
+// frame forces the browser to redo layout 60 times a second, which stutters on phones.
+export function setText(el, text) {
+  if (el._text !== text) { el._text = text; el.textContent = text; }
+}
+export function setHTML(el, html) {
+  if (el._html !== html) { el._html = html; el.innerHTML = html; }
+}
+export function setFlag(el, prop, value) {
+  if (el[prop] !== value) el[prop] = value;
+}
+export function setClass(el, cls, on) {
+  if (el.classList.contains(cls) !== on) el.classList.toggle(cls, on);
+}

@@ -35,3 +35,6 @@
 | 31 | 2026-11-05 | Movement is virtual (tap/drag), not real GPS | Friends outside Lawrenceville can play |
 | 32 | 2026-11-05 | Engine changed from Phaser to Three.js | Phaser is 2D-only |
 | 33 | 2026-11-05 | Places: house on Honeysuckle Ave (random, not his address), Wawa on West Pike St, school on New Hope Rd | Good real routes through downtown |
+| 34 | 2026-11-05 | Ground layers (roads, curbs, parks) drawn as unlit, ordered decals | Removes road flicker and jagged patches on phone GPUs |
+| 35 | 2026-11-05 | Drive routes smoothed into curves; car auto-slows for tight corners | Removes sideways jerks at corners |
+| 36 | 2026-11-05 | clockSpeed lowered from 15 to 12 | Corner slowdowns made drives longer; keeps typical arrival near 7:45 |

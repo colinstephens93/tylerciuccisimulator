@@ -16,7 +16,7 @@ describe('clock', () => {
 
   it('advances at clockSpeed game-seconds per real second', () => {
     const c = new GameClock(config);
-    c.tick(4000); // 4 real seconds * 15 = 60 game seconds
+    c.tick(60000 / config.clockSpeed); // enough real time for one game minute
     expect(c.minutes).toBeCloseTo(parseTime('07:01'));
   });
 

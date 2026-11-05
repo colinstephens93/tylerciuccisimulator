@@ -3,7 +3,7 @@ import { state } from '../state.js';
 import { audio } from '../audio.js';
 import { formatTime } from '../logic/clock.js';
 import { totals } from '../logic/wawa.js';
-import { h, $ } from './dom.js';
+import { h, $, setText, setHTML, setFlag, setClass } from './dom.js';
 
 export class Hud {
   constructor() {
@@ -51,19 +51,19 @@ export class Hud {
   update() {
     const c = state.clock;
     const left = c.minutesUntilBell();
-    this.time.textContent = formatTime(c.minutes);
-    this.bell.textContent = `Bell ${formatTime(c.bell)} · ${Math.max(0, Math.ceil(left))} min`;
-    this.clock.classList.toggle('warn', left <= 10 && left > 5);
-    this.clock.classList.toggle('late', left <= 5);
-    this.tray.hidden = !state.showTray;
+    setText(this.time, formatTime(c.minutes));
+    setText(this.bell, `Bell ${formatTime(c.bell)} · ${Math.max(0, Math.ceil(left))} min`);
+    setClass(this.clock, 'warn', left <= 10 && left > 5);
+    setClass(this.clock, 'late', left <= 5);
+    setFlag(this.tray, 'hidden', !state.showTray);
     if (state.showTray) {
       const t = totals(state.inventory);
       const g = state.config.wawaGoals;
       const okF = t.calories >= g.minCalories;
       const okC = t.caffeineMg >= g.minCaffeineMg;
-      this.tray.innerHTML = `<div class="${okF ? 'ok' : ''}">Food ${t.calories}/${g.minCalories} cal</div><div class="${okC ? 'ok' : ''}">Caffeine ${t.caffeineMg}/${g.minCaffeineMg} mg</div>`;
+      setHTML(this.tray, `<div class="${okF ? 'ok' : ''}">Food ${t.calories}/${g.minCalories} cal</div><div class="${okC ? 'ok' : ''}">Caffeine ${t.caffeineMg}/${g.minCaffeineMg} mg</div>`);
     }
-    this.objective.textContent = state.objective;
-    this.objective.hidden = !state.objective;
+    setText(this.objective, state.objective);
+    setFlag(this.objective, 'hidden', !state.objective);
   }
 }

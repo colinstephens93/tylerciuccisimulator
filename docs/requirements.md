@@ -152,7 +152,7 @@ Tyler's wife, Amanda, calls him several times during the run. Each call is a sho
 
 - First bell: **8:00 AM**.
 - Clock starts at **7:00 AM** (proposed), giving 60 in-game minutes.
-- Proposed pacing for a ~4 minute run: 1 real second = about 15 in-game seconds. A typical player arrives around 7:45 to 7:50; slow play or many collisions and calls can push past 8:00.
+- Pacing: 1 real second = 12 in-game seconds (`clockSpeed`). The drives take about 55 s and 76 s of real time (about 11 and 15 game minutes) with the car slowing for corners. A typical player arrives around 7:45; slow play or many collisions and calls can push past 8:00.
 - All of these are tuning values in the config file.
 
 ## 9. Configuration (easy to change)
@@ -166,7 +166,7 @@ All names and tuning values that may change live in one file: `src/config/game.c
   "townName": "Lawrenceville",
   "startTime": "07:00",
   "firstBell": "08:00",
-  "clockSpeed": 15,
+  "clockSpeed": 12,
   "favoriteGhostFlavor": "Root Beer",
   "wawaGoals": { "minCalories": 1000, "minCaffeineMg": 300 },
   "ghostCaffeineMg": 300,

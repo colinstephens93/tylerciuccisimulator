@@ -4,7 +4,7 @@
   "townName": "Lawrenceville",
   "startTime": "07:00",
   "firstBell": "08:00",
-  "clockSpeed": 15,
+  "clockSpeed": 12,
   "favoriteGhostFlavor": "Root Beer",
   "wawaGoals": { "minCalories": 1000, "minCaffeineMg": 300 },
   "ghostCaffeineMg": 300,

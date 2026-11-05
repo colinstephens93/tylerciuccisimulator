@@ -213,8 +213,14 @@ export class World {
     for (const l of this.labels) {
       v.copy(l.getPos()).project(this.camera);
       const visible = v.z < 1 && Math.abs(v.x) < 1.2 && Math.abs(v.y) < 1.2;
-      l.el.style.display = visible ? '' : 'none';
-      if (visible) l.el.style.transform = `translate(${((v.x + 1) / 2) * w}px, ${((1 - v.y) / 2) * h}px) translate(-50%, -100%)`;
+      if (l.visible !== visible) { l.visible = visible; l.el.style.display = visible ? '' : 'none'; }
+      if (visible) {
+        // Round to whole pixels so labels don't re-render for sub-pixel moves.
+        const x = Math.round(((v.x + 1) / 2) * w);
+        const y = Math.round(((1 - v.y) / 2) * h);
+        const key = x * 10000 + y;
+        if (l.pos !== key) { l.pos = key; l.el.style.transform = `translate3d(${x}px, ${y}px, 0) translate(-50%, -100%)`; }
+      }
     }
   }
 

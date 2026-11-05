@@ -4,15 +4,33 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import { toon } from '../engine/models.js';
 import { vert } from './graph.js';
 
+// Flat ground layers are drawn as decals: no depth test or depth write, painted in a fixed
+// order (renderOrder) before anything that stands on the ground. Stacking them at slightly
+// different heights instead causes z-fighting (flickering, jagged patches) on phone GPUs.
 const ROAD_LAYERS = [
-  { types: ['service', 'living_street'], color: 0x9b9ea3, y: 0.1 },
-  { types: ['residential', 'unclassified', 'tertiary', 'tertiary_link'], color: 0x7d8187, y: 0.14 },
-  { types: ['secondary', 'secondary_link', 'primary', 'primary_link', 'trunk', 'trunk_link', 'motorway', 'motorway_link'], color: 0x6a6e75, y: 0.18 },
+  { types: ['service', 'living_street'], color: 0x8f9297 },
+  { types: ['residential', 'unclassified', 'tertiary', 'tertiary_link'], color: 0x74787e },
+  { types: ['secondary', 'secondary_link', 'primary', 'primary_link', 'trunk', 'trunk_link', 'motorway', 'motorway_link'], color: 0x63676d },
 ];
+export const DECAL_ORDER = { ground: -100, parks: -95, water: -94, curb: -90, roads: -85, centerLines: -80, route: -75 };
+const Y = 0.02;
+
+// Unlit: flat ground paint doesn't need shading, and lighting would shade any
+// downward-facing triangles differently (visible as lighter patches).
+const decalCache = new Map();
+export function decalMaterial(color) {
+  if (!decalCache.has(color)) decalCache.set(color, new THREE.MeshBasicMaterial({ color, depthWrite: false, depthTest: false, side: THREE.DoubleSide }));
+  return decalCache.get(color);
+}
+
+function asDecal(mesh, order) {
+  mesh.renderOrder = order;
+  return mesh;
+}
 const BUILDING_COLORS = [0xf2ede3, 0xe9e2d0, 0xdfe6ea, 0xf0e2d0, 0xe6d8c8, 0xd9e4d4, 0xeee7da];
 
 // Flat ribbon (plus round joints) along a polyline, appended to a positions array.
-function addRibbon(out, pts, halfWidth, y) {
+export function addRibbon(out, pts, halfWidth, y) {
   for (let i = 0; i < pts.length - 1; i++) {
     const [ax, az] = pts[i];
     const [bx, bz] = pts[i + 1];
@@ -23,8 +41,17 @@ function addRibbon(out, pts, halfWidth, y) {
     out.push(ax + nx, y, az + nz, bx - nx, y, bz - nz, bx + nx, y, bz + nz);
     out.push(ax + nx, y, az + nz, ax - nx, y, az - nz, bx - nx, y, bz - nz);
   }
-  const seg = 10;
-  for (const [cx, cz] of pts) {
+  // Round joints only where the road bends or ends, so corners look smooth.
+  const seg = 16;
+  for (let i = 0; i < pts.length; i++) {
+    const [cx, cz] = pts[i];
+    if (i > 0 && i < pts.length - 1) {
+      const [px, pz] = pts[i - 1];
+      const [nx2, nz2] = pts[i + 1];
+      const a1 = Math.atan2(cx - px, cz - pz);
+      const a2 = Math.atan2(nx2 - cx, nz2 - cz);
+      if (Math.abs(Math.atan2(Math.sin(a2 - a1), Math.cos(a2 - a1))) < 0.05) continue;
+    }
     for (let k = 0; k < seg; k++) {
       const a0 = (k / seg) * Math.PI * 2;
       const a1 = ((k + 1) / seg) * Math.PI * 2;
@@ -39,7 +66,7 @@ function flatMesh(positions, color) {
   const normals = new Float32Array(positions.length);
   for (let i = 1; i < normals.length; i += 3) normals[i] = 1;
   geo.setAttribute('normal', new THREE.BufferAttribute(normals, 3));
-  return new THREE.Mesh(geo, toon(color, { side: THREE.DoubleSide }));
+  return new THREE.Mesh(geo, decalMaterial(color));
 }
 
 function polygonMesh(polys, color, y) {
@@ -57,7 +84,7 @@ function polygonMesh(polys, color, y) {
     }
   }
   if (!geos.length) return null;
-  return new THREE.Mesh(mergeGeometries(geos), toon(color));
+  return new THREE.Mesh(mergeGeometries(geos), decalMaterial(color));
 }
 
 function centroid(flat) {
@@ -89,14 +116,14 @@ export function buildCity(map, clearZones) {
   const city = new THREE.Group();
   const [W, H] = map.size;
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 1600, H + 1600), toon(0xb4cf8f));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 1600, H + 1600), decalMaterial(0xa8c784));
   ground.rotation.x = -Math.PI / 2;
-  city.add(ground);
+  city.add(asDecal(ground, DECAL_ORDER.ground));
 
-  const parks = polygonMesh(map.parks, 0x84b56a, 0.02);
-  if (parks) city.add(parks);
-  const water = polygonMesh(map.water, 0x6fb7e0, 0.03);
-  if (water) city.add(water);
+  const parks = polygonMesh(map.parks, 0x7cab60, Y);
+  if (parks) city.add(asDecal(parks, DECAL_ORDER.parks));
+  const water = polygonMesh(map.water, 0x6fb7e0, Y);
+  if (water) city.add(asDecal(water, DECAL_ORDER.water));
 
   // Roads: a light curb outline under each road, then the asphalt.
   const curb = [];
@@ -105,13 +132,13 @@ export function buildCity(map, clearZones) {
   for (const r of map.roads) {
     const pts = r.v.map((i) => vert(map, i));
     const li = ROAD_LAYERS.findIndex((l) => l.types.includes(r.t));
-    addRibbon(curb, pts, r.w / 2 + 0.9, 0.06);
-    addRibbon(layers[li], pts, r.w / 2, ROAD_LAYERS[li].y);
-    if (li === 2) addRibbon(centerLines, pts, 0.18, 0.22);
+    addRibbon(curb, pts, r.w / 2 + 0.9, Y);
+    addRibbon(layers[li], pts, r.w / 2, Y);
+    if (li === 2) addRibbon(centerLines, pts, 0.18, Y);
   }
-  city.add(flatMesh(curb, 0xe7e1d3));
-  layers.forEach((pos, i) => city.add(flatMesh(pos, ROAD_LAYERS[i].color)));
-  city.add(flatMesh(centerLines, 0xf2c94c));
+  city.add(asDecal(flatMesh(curb, 0xdcd5c4), DECAL_ORDER.curb));
+  layers.forEach((pos, i) => city.add(asDecal(flatMesh(pos, ROAD_LAYERS[i].color), DECAL_ORDER.roads + i)));
+  city.add(asDecal(flatMesh(centerLines, 0xf2c94c), DECAL_ORDER.centerLines));
 
   // Buildings (skipping lots where we place our own Wawa, school and house)
   const isClear = (x, z) => clearZones.some((c) => Math.hypot(c.x - x, c.z - z) < c.r);
