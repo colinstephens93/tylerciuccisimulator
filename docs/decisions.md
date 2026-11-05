@@ -9,8 +9,8 @@
 | 5 | 2026-11-05 | Breakfast is always a breakfast sandwich; drink is always Ghost Energy | Matches Tyler's real routine |
 | 6 | 2026-11-05 | Setting is a real Georgia town just outside Atlanta | User request |
 | 7 | 2026-11-05 | Arriving after the first bell is a fail; otherwise casual (generous timer, collisions cost time only, instant retry from last scene) | Stakes without frustration |
-| 8 | 2026-11-05 | Pixel art | User request |
-| 9 | 2026-11-05 | On foot: Pokemon Go-inspired centered-avatar town map, original art; driving uses a separate top-down road view | User request |
+| 8 | 2026-11-05 | (Superseded by #29) Pixel art | User request |
+| 9 | 2026-11-05 | (Superseded by #29-30) On foot: centered-avatar town map; driving in a separate top-down view | User request |
 | 10 | 2026-11-05 | Tyler walks into a rendered Wawa interior to order | User request |
 | 11 | 2026-11-05 | Town is Lawrenceville, GA | User choice |
 | 12 | 2026-11-05 | Wawa is made up (no real Wawa in Lawrenceville) | Creative license approved by user |
@@ -30,3 +30,8 @@
 | 26 | 2026-11-05 | Wawa goals: at least 1,000 calories of food and 300 mg caffeine; each Ghost can is 300 mg | User input |
 | 27 | 2026-11-05 | Under 1,000 calories lowers the score; going over either goal has no penalty | User input |
 | 28 | 2026-11-05 | Language is JavaScript | Default accepted |
+| 29 | 2026-11-05 | Switch from 2D pixel art to smooth 3D in the style of a location-based map game (Pokemon Go-like genre), with original art and UI | User request |
+| 30 | 2026-11-05 | Driving uses the same 3D world, along real routed streets | User choice |
+| 31 | 2026-11-05 | Movement is virtual (tap/drag), not real GPS | Friends outside Lawrenceville can play |
+| 32 | 2026-11-05 | Engine changed from Phaser to Three.js | Phaser is 2D-only |
+| 33 | 2026-11-05 | Places: house on Honeysuckle Ave (random, not his address), Wawa on West Pike St, school on New Hope Rd | Good real routes through downtown |

@@ -1,10 +1,10 @@
 # Requirements
 
-Version 0.6 - 2026-11-05
+Version 0.7 - 2026-11-05
 
 ## 1. Vision
 
-A short, lighthearted, mobile-friendly pixel-art web game that follows Deputy Tyler Ciucci, a School Resource Officer (SRO) in Lawrenceville, Georgia (Gwinnett County, just northeast of Atlanta), through the start of his workday. The tone is affectionate comedy.
+A short, lighthearted, mobile-friendly 3D web game that follows Deputy Tyler Ciucci, a School Resource Officer (SRO) in Lawrenceville, Georgia (Gwinnett County, just northeast of Atlanta), through the start of his workday. The tone is affectionate comedy.
 
 Target session length: 3 to 5 minutes for the MVP.
 
@@ -15,17 +15,21 @@ Target session length: 3 to 5 minutes for the MVP.
 - Primary orientation: portrait.
 - Audience: friends, family, and coworkers of Tyler.
 
-## 3. Visual direction
+## 3. Visual direction and controls
 
-- **Art style:** Pixel art throughout.
-- **Walking mode (on foot):** Inspired by the feel of Pokemon Go's map view: Tyler's avatar stays centered on screen on a clean, stylized overhead map of the town, with a slightly tilted perspective, soft colors, simplified roads, and landmark buildings drawn as icons/sprites. Tap the map to walk to a spot (or use an on-screen joystick).
-  - All art, icons, and UI are original. We borrow the *feel* (centered avatar on a living town map), not Pokemon Go's actual assets, UI layout, logos, or characters.
-- **Driving mode:** A different camera. Top-down, vertically scrolling road behind the wheel of the vehicle (see Scene 2).
-- **Interiors:** Buildings Tyler enters (Wawa first) are rendered as their own pixel-art rooms, top-down 3/4 view like a classic handheld RPG interior.
+The game is a 3D, location-based map game in the style of Pokemon Go, set on Lawrenceville's real streets. It is an original game in that genre: we use the genre's conventions, not Pokemon Go's own art, UI, icons, sounds, or characters.
+
+- **Look:** Smooth 3D with cartoon (toon) shading. Low-poly buildings extruded from real OpenStreetMap footprints, roads at their real positions, pine and hardwood trees, soft sky and distance fog.
+- **Camera:** Tilted 3D camera that follows Tyler. Drag to rotate around him, pinch (or mouse wheel) to zoom.
+- **On foot:** Tyler stays centered with a pulsing ring under him. Tap the ground to walk there; tap a destination (beacon, label, or building) to walk to it. Destinations have a floating pin beacon and a label.
+- **Driving:** The same 3D world. Tyler gets in the patrol car and drives the real route, shown as a GPS-style line. The camera sits behind the car (drag to look around; it drifts back).
+- **Movement is virtual** (tap/drag), not real GPS, so friends anywhere can play.
+- **Interiors:** Walking through the Wawa door enters a 3D store interior with a cutaway front wall.
+- **UI:** Native web UI over the 3D view (clock card, objective pill, toasts, panels, phone call card) so text stays crisp on phones.
 
 ## 4. Character: Tyler Ciucci
 
-Sprite reference is a photo the user supplied (kept out of the repo; see open questions).
+3D model reference is a photo the user supplied (kept out of the repo).
 
 | Trait | Description |
 | --- | --- |
@@ -37,23 +41,21 @@ Sprite reference is a photo the user supplied (kept out of the repo; see open qu
 | Gear | Duty belt with flashlight holster; gold badge clipped at the belt |
 | Details | Black wristband; phone with a red phone grip (good for idle/selfie animation) |
 
-Sprite needs (MVP):
-- Walk cycle in 4 directions (or 8 for the map view).
-- Idle animation (checking his phone).
-- "Drinking energy drink" reaction.
-- Small head portrait for dialogue boxes and the HUD.
+Model (MVP): low-poly cartoon figure built in code, oversized on the map so he reads well, with a walk cycle (arm/leg swing, bob). Later: idle phone-check animation and a "drinking Ghost" reaction.
 
-Avoid reproducing real agency patches or insignia text on the badge; a generic silver star reads correctly at pixel scale.
+No real agency patches or insignia text; a generic silver star.
 
 ## 5. Setting: Lawrenceville, Georgia
 
-- **Real streets:** The town map follows Lawrenceville's real street layout, generated from OpenStreetMap (OSM) data.
-  - OSM data is pre-processed at build time into pixel-art tilemaps (roads, blocks, parks, water). The game does not load live map tiles, so it works offline and keeps the pixel look.
+- **Real streets:** The town follows Lawrenceville's real street layout and building footprints from OpenStreetMap (OSM).
+  - `scripts/fetch-osm.mjs` downloads OSM data once and writes a compact file (`src/data/lawrenceville.json`, about 380 KB). The game does not load live map tiles, so it works offline.
+  - Drives use real routing over the street graph, including one-way streets.
   - Major real roads and landmarks are recognizable (for example, the historic downtown square and courthouse, US-29 / Pike St, GA-20 / Buford Dr, GA-316).
   - OSM's license (ODbL) requires credit: the game shows "Map data (c) OpenStreetMap contributors" on the title or credits screen.
-- **Tyler's home:** A generic house on a fictional or non-specific residential street. His real address is never used.
-- **Wawa:** Made up. A Wawa-style store placed on a real major road in Lawrenceville. No real Wawa exists there; this is creative license.
-- **School:** Fictional and renameable (see section 9).
+- **Tyler's home:** A generic house on Honeysuckle Avenue, chosen at random. Not his real address.
+- **Places config:** `src/config/places.json` sets where the house, Wawa, and school go (lot center and road). Real buildings on those lots are removed.
+- **Wawa:** Made up, on West Pike Street. No real Wawa exists there; this is creative license.
+- **School:** Fictional and renameable (see section 9), on New Hope Road.
 - **Georgia flavor:** Pine trees, red clay, a peach stand, humid haze in the morning light.
 
 ## 6. MVP gameplay: "The Morning Run"
@@ -65,23 +67,22 @@ The game alternates between walking mode and driving mode.
 - Clock starts at 7:00 AM (configurable).
 
 ### Scene 2 - Drive to Wawa (driving)
-- Vehicle: a **marked patrol car** (see "Patrol car" below).
-- Top-down, vertically scrolling road.
-- Controls: tap/hold left or right half of the screen to steer; desktop uses arrow keys / A-D.
-- Hazards: civilian traffic, potholes, a slow pickup truck, a school bus.
+- The patrol car follows the real route along Lawrenceville streets (currently Honeysuckle Avenue to West Pike Street), shown as a GPS-style line.
+- Controls: the car accelerates on its own. Tap left/right to change lanes, hold BRAKE to slow down. Desktop: arrow keys / A-D, S or Space to brake.
+- Hazards: traffic in your direction (cars, pickups, school buses), potholes; oncoming traffic for atmosphere.
 - Collisions cost time; they never end the game.
 - End: pull into the Wawa lot.
 
 ### Patrol car
 
-- Pixel-art marked patrol car: dark body with white doors, "SHERIFF" lettering, roof light bar, push bumper.
+- 3D marked patrol car: dark body with white doors, "SHERIFF" lettering, roof light bar, push bumper.
 - Generic markings only: no real agency seal, unit number, or plate. Livery colors and door text are set in the config file.
 - **Lights button (proposed):** Tapping it turns on the light bar and siren, and traffic pulls aside. Using it for a breakfast run is not an emergency, so each use adds an infraction (and possibly an Amanda-style text from "Sarge"). Risk/reward for players who are running late.
 - Light bar flashes on the parked car outside Wawa and the school as an idle detail.
 
 ### Scene 3 - Wawa (walking, then interior)
 - Walk across the parking lot on the map and into the front door.
-- Interior is a rendered pixel-art Wawa-style store: entrance, touchscreen ordering kiosks, deli counter, drink coolers, checkout.
+- Interior is a 3D Wawa-style store: entrance, touchscreen ordering kiosks, deli counter with staff, Ghost cooler, snack aisles, coffee bar, register.
 - **Wawa goals** (must be checked before leaving the store):
   - **Food:** at least **1,000 calories** of food.
   - **Caffeine:** at least **300 mg** of caffeine.
@@ -99,7 +100,7 @@ The game alternates between walking mode and driving mode.
 - Exit back to the vehicle.
 
 ### Scene 4 - Drive to school (driving)
-- Same driving engine, new route.
+- Same driving engine, real route through downtown (West Pike, Crogan, Culver, Luckie, Jackson, New Hope Road).
 - School-zone hazards: reduced speed limit, crossing guard, buses, car-rider line.
 - Speeding in the school zone adds an infraction (score penalty, not a fail).
 
@@ -218,15 +219,15 @@ Footsteps, car door, engine and tire screech, collision bump, horn, siren and li
 - **No accounts, no data collection:** Scores and checkpoints stored only in the browser (localStorage).
 - **Accessibility:** Readable text at phone size, color is never the only signal, music and sound toggles, and on-screen subtitles for all phone calls.
 
-## 12. Technical approach (proposed)
+## 12. Technical approach
 
 - **Language:** JavaScript.
-- **Engine:** Phaser 3 (canvas rendering, pixel-perfect scaling, touch input, scene management, tilemaps).
-- **Maps:** Town map and Wawa interior built as tilemaps (Tiled editor format), so layouts can be edited without code changes.
-- **Real-streets pipeline:** A build script downloads an OSM extract of Lawrenceville (Overpass API), converts roads and areas into a tile grid, and writes a Tiled map. Hand-placed buildings (home, Wawa, school) are added on a separate layer.
-- **Build:** Vite for local dev and bundling.
-- **Hosting:** GitHub Pages from this repository.
-- **Art pipeline:** Placeholder shapes first, then pixel sprites (Aseprite or similar), at a base resolution of 16x16 or 32x32 tiles scaled up with nearest-neighbor.
+- **3D engine:** Three.js (WebGL). Models are built from primitives in code; no model files.
+- **Map:** OpenStreetMap data pre-processed by `scripts/fetch-osm.mjs`; roads and buildings merged into a few large meshes; trees drawn with instancing.
+- **Routing:** Dijkstra shortest path over the road graph (`src/map/graph.js`), unit tested.
+- **UI:** HTML/CSS overlay.
+- **Audio:** Web Audio synthesized chiptune music and effects.
+- **Build:** Vite. **Hosting:** GitHub Pages.
 
 ## 13. Real people and brands
 
@@ -241,6 +242,6 @@ Footsteps, car door, engine and tire screech, collision bump, horn, siren and li
 ## 14. Out of scope for MVP
 
 - Scenes after arriving at school (hallway patrol, lunch duty, etc.).
-- Real-world GPS / location-based play.
+- Real-world GPS movement (movement is virtual so anyone can play).
 - Multiplayer, leaderboards, or accounts.
 - Native app store builds.

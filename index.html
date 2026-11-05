@@ -4,16 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="robots" content="noindex, nofollow" />
-    <meta name="theme-color" content="#111111" />
+    <meta name="theme-color" content="#14213d" />
     <title>Tyler Ciucci Simulator</title>
-    <style>
-      html, body { margin: 0; height: 100%; background: #111; overflow: hidden; touch-action: none; overscroll-behavior: none; }
-      #game { width: 100vw; height: 100dvh; }
-      canvas { image-rendering: pixelated; }
-    </style>
   </head>
   <body>
-    <div id="game"></div>
+    <div id="app">
+      <div id="view"></div>
+      <div id="labels"></div>
+      <div id="hud" hidden></div>
+      <div id="controls"></div>
+      <div id="overlay"></div>
+      <div id="screen"></div>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
