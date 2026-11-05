@@ -1,0 +1,6 @@
+{
+  "_note": "Lot centers in local meters (x = east, z = south of the courthouse square). Each building faces the nearest point on its road. None of these are real addresses; the Wawa and school are fictional.",
+  "home": { "lot": [-933, -292], "road": "Honeysuckle Avenue", "clearRadius": 26 },
+  "wawa": { "lot": [-658, -148], "road": "West Pike Street", "clearRadius": 32 },
+  "school": { "lot": [832, 545], "road": "New Hope Road", "clearRadius": 55 }
+}
