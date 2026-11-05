@@ -12,3 +12,12 @@
 | 8 | 2026-11-05 | Pixel art | User request |
 | 9 | 2026-11-05 | On foot: Pokemon Go-inspired centered-avatar town map, original art; driving uses a separate top-down road view | User request |
 | 10 | 2026-11-05 | Tyler walks into a rendered Wawa interior to order | User request |
+| 11 | 2026-11-05 | Town is Lawrenceville, GA | User choice |
+| 12 | 2026-11-05 | Wawa is made up (no real Wawa in Lawrenceville) | Creative license approved by user |
+| 13 | 2026-11-05 | Town map follows real streets via OpenStreetMap, pre-processed into pixel tilemaps; OSM credit shown | Real streets requested; offline-friendly and keeps pixel art |
+| 14 | 2026-11-05 | Tyler knows about the game | Confirmed by user |
+| 15 | 2026-11-05 | Favorite Ghost Energy flavor is Root Beer (bonus when chosen) | User input |
+| 16 | 2026-11-05 | Running joke: wife Amanda keeps calling, mood unknown until answered | User input |
+| 17 | 2026-11-05 | School name is fictional and set in `src/config/game.config.json` | Must be easy to change |
+| 18 | 2026-11-05 | First bell is 8:00 AM | User input |
+| 19 | 2026-11-05 | Tyler's real home address is not used | Privacy |
