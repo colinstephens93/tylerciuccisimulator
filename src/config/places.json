@@ -41,6 +41,7 @@
       -162
     ],
     "road": "West Pike Street",
-    "label": "El Cregs"
+    "label": "El Cregs",
+    "clearRadius": 34
   }
 }

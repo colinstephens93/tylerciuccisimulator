@@ -45,6 +45,7 @@ Progress (coins, cans, mission records) and sound settings are saved in the brow
 | --- | --- |
 | `src/config/game.config.json` | Names, patrol car colors, walk/run/jump speeds, traffic and pedestrian counts, number of hidden cans, max pixel ratio |
 | `src/data/missions.json` | Missions: who sends them, brief text, stages (`reach`, `meet`, `collect`, `smash`, `pursuit`; a `meet` stage has dialogue lines), time limits, rewards. Checked by `npm test` |
+| `src/data/dan.json` | Lines Dan says when you walk up to him in free roam |
 | `src/config/places.json` | Where the house, Wawa, school, El Cregs and the square sit on the map |
 
 ## Code map

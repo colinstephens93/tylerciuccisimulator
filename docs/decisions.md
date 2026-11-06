@@ -51,3 +51,4 @@
 | 47 | 2026-11-06 | Dan gets a realistic model matching his reference photos (Tyler's style, a bit larger); photos are not committed | User request |
 | 48 | 2026-11-06 | Dan Reiner knows he's in the game; El Cregs is made up; Dan's dialogue approved; no cigar; townspeople stay cartoon-styled | User answers |
 | 49 | 2026-11-06 | Last names on uniforms: CIUCCI name tape on Tyler's vest, REINER on Dan's windbreaker | User request |
+| 50 | 2026-11-06 | More Dan chatter (the accidental dog story, his neighbor) in `src/data/dan.json`; two storefronts by El Cregs: Nick's Diabetes Hut and Swizzy's Jewish Jerk 4 Kirk Poutine | User request. Swizzy's is a restaurant, not a synagogue, so the joke doesn't land on a house of worship |

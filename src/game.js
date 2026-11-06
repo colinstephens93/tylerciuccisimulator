@@ -9,7 +9,8 @@ import { World } from './engine/world.js';
 import { Controls } from './engine/input.js';
 import { Fx } from './engine/fx.js';
 import { makeTyler } from './engine/tyler.js';
-import { makeFoodTruck, makeDan } from './engine/elcregs.js';
+import { makeFoodTruck, makeDan, makeStorefront } from './engine/elcregs.js';
+import danLines from './data/dan.json';
 import {
   makePatrolCar, makeHouse, makeWawa, makeSchool, makeArrow, makeMissionMarker, LANDMARK_BOXES,
 } from './engine/models.js';
@@ -63,7 +64,7 @@ export class Game {
         this.colliders.addBox(wx, wz, hw, hd, p.rot);
       }
     }
-    const clear = Object.values(places).filter((p) => p.building).map((p) => ({ x: p.x, z: p.z, r: p.clearRadius }));
+    const clear = Object.values(places).filter((p) => p.clearRadius > 0).map((p) => ({ x: p.x, z: p.z, r: p.clearRadius }));
     scene.add(buildCity(map, clear, this.colliders, this.roads));
     const put = (obj, p) => { obj.position.set(p.x, 0, p.z); obj.rotation.y = p.rot; scene.add(obj); };
     put(makeHouse(), places.home);
@@ -171,6 +172,20 @@ export class Game {
     this.colliders.addCircle(dx, dz, 0.5, 'npc');
     p.marker = [dx, dz];
     this.world.addLabel('El Cregs', () => truck.position.clone().setY(6.5), 'label', 140);
+
+    // Two storefronts flanking the truck, facing the road.
+    const shops = [
+      { side: -1, name: "NICK'S DIABETES HUT", sub: 'SWEET TEA · DONUTS · SODA', wall: 0xffb3d1, trim: 0xff4f9a, awning: [0xff4f9a, 0xffffff], signBg: '#ff4f9a', signFg: '#ffffff' },
+      { side: 1, name: "SWIZZY'S", sub: 'JEWISH JERK 4 KIRK POUTINE', wall: 0xcfe3ff, trim: 0x1f4fa8, awning: [0x1f4fa8, 0xffffff], signBg: '#1f4fa8', signFg: '#ffd23f' },
+    ];
+    for (const s of shops) {
+      const shop = makeStorefront(s);
+      const [sx, sz] = toWorld(tx, tz, rot, s.side * 15, -1.5);
+      shop.position.set(sx, 0, sz);
+      shop.rotation.y = rot;
+      this.world.scene.add(shop);
+      this.colliders.addBox(sx, sz, shop.userData.width / 2, shop.userData.depth / 2, rot);
+    }
     return { key: 'dan', label: 'Agent Reiner', model, rig: model.userData.rig, x: dx, z: dz, heading: rot, baseHeading: rot, wave: 0, chatter: 0 };
   }
 
@@ -189,9 +204,11 @@ export class Game {
       // In free roam, Dan has a word for Tyler when he walks up.
       n.chatter -= dt;
       if (!this.mission && !this.driving && d < 3 && n.chatter <= 0) {
-        n.chatter = 12;
-        const lines = ['Flautas are on me today, Deputy.', 'Quiet morning. Want a flauta?', 'Salsa verde. Trust me.', "Don't tell Amanda I keep feeding you."];
-        this.world.popText(lines[Math.floor(Math.random() * lines.length)], n.model.position.clone().setY(3.2), 'pop say', 2600);
+        n.chatter = 6;
+        const lines = danLines.chatter;
+        n.lastLine = (n.lastLine ?? -1) + 1 + Math.floor(Math.random() * (lines.length - 1)); // never the same line twice in a row
+        n.lastLine %= lines.length;
+        this.world.popText(lines[n.lastLine], n.model.position.clone().setY(3.2), 'pop say', 4500);
         audio.sfx('ding');
       }
     }

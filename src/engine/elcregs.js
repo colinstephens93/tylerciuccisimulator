@@ -67,6 +67,36 @@ export function makeFoodTruck() {
   return g;
 }
 
+// Small one-story storefront facing local +z: sign board, windows, door and striped awning.
+export function makeStorefront({ name, sub, wall, trim, awning, signBg, signFg }) {
+  const g = new THREE.Group();
+  const W = 13;
+  const Dp = 9;
+  const H = 5;
+  g.add(mesh(new THREE.BoxGeometry(W, H, Dp), toon(wall), 0, H / 2, 0));
+  g.add(mesh(new THREE.BoxGeometry(W + 0.3, 0.4, Dp + 0.3), toon(trim), 0, H + 0.2, 0)); // roof trim
+  g.add(mesh(new THREE.BoxGeometry(W, 2.0, 0.3), toon(trim), 0, H + 0.6, Dp / 2 - 0.15)); // parapet
+  const big = sign(name, W - 0.6, 1.1, { w: 1024, h: 110, bg: signBg, fg: signFg, font: '900 92px system-ui, sans-serif' });
+  big.position.set(0, H + 0.95, Dp / 2 + 0.01);
+  g.add(big);
+  const small = sign(sub, W - 1.2, 0.7, { w: 1024, h: 60, bg: signBg, fg: '#ffffff', font: '800 48px system-ui, sans-serif' });
+  small.position.set(0, 4.1, Dp / 2 + 0.03); // on the wall, between the awning and the roof trim
+  g.add(small);
+  // Door and big front windows
+  g.add(mesh(new THREE.BoxGeometry(1.6, 2.6, 0.12), toon(0x3a2a1f), 0, 1.3, Dp / 2 + 0.02));
+  g.add(mesh(new THREE.BoxGeometry(0.1, 0.1, 0.15), glow(0xffd23f), 0.55, 1.3, Dp / 2 + 0.1));
+  for (const s of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(3.8, 2.0, 0.1), toon(0xbfe9ff, { emissive: 0x1a3344 }), 3.6 * s, 1.9, Dp / 2 + 0.02));
+  // Striped awning over the windows
+  for (let i = 0; i < 10; i++) {
+    const a = mesh(new THREE.BoxGeometry(1.2, 0.08, 1.6), toon(awning[i % 2]), -5.4 + i * 1.2, 3.35, Dp / 2 + 0.75);
+    a.rotation.x = 0.3;
+    g.add(a);
+  }
+  g.add(mesh(new THREE.BoxGeometry(W + 1, 0.06, 2.5), toon(0xd8d2c4), 0, 0.03, Dp / 2 + 1.25)); // front walk
+  g.userData = { width: W, depth: Dp };
+  return g;
+}
+
 // ATF Agent Dan Reiner, modeled after reference photos with realistic proportions to match Tyler:
 // a big, heavyset guy with a round face and rosy cheeks, strawberry-blond hair in a swept-back
 // pompadour with short sides, a full ginger beard and mustache, light blue-grey eyes and black
