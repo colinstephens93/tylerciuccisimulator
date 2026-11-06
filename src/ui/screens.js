@@ -72,7 +72,7 @@ export function dialogueCard(lines, onDone) {
     const l = lines[i];
     avatar.textContent = l.who[0];
     avatar.className = `avatar ${l.who === 'Tyler' ? 'tyler' : ''}`;
-    name.textContent = l.who === 'Dan' ? 'Agent Dan (ATF)' : l.who;
+    name.textContent = l.who === 'Dan' ? 'Agent Dan Reiner (ATF)' : l.who;
     bubble.textContent = l.line;
     bubble.className = `bubble ${l.who === 'Tyler' ? 'me' : ''}`;
     next.textContent = i + 1 < lines.length ? 'Next' : 'Got it';

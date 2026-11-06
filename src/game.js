@@ -171,7 +171,7 @@ export class Game {
     this.colliders.addCircle(dx, dz, 0.5, 'npc');
     p.marker = [dx, dz];
     this.world.addLabel('El Cregs', () => truck.position.clone().setY(6.5), 'label', 140);
-    return { key: 'dan', label: 'Agent Dan', model, rig: model.userData.rig, x: dx, z: dz, heading: rot, baseHeading: rot, wave: 0, chatter: 0 };
+    return { key: 'dan', label: 'Agent Reiner', model, rig: model.userData.rig, x: dx, z: dz, heading: rot, baseHeading: rot, wave: 0, chatter: 0 };
   }
 
   // Dan idles by the truck, turns to face Tyler, and waves him over.

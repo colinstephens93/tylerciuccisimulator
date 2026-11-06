@@ -1,11 +1,11 @@
 // Deputy Tyler Ciucci, modeled after the reference photo with realistic proportions:
 // stocky build, short dark-brown hair with faded sides, a full mustache, black short-sleeve
-// uniform shirt under a black plate-carrier vest (silver star, name tape, magazine and radio
+// uniform shirt under a black plate-carrier vest (silver star, CIUCCI name tape, magazine and radio
 // pouches, body camera), black duty pants and boots, duty belt with a gold star badge and
 // holster, black watch (left wrist), bracelet (right wrist), and a phone with a red grip.
 // Generic insignia only: no agency patches, names or numbers.
 import * as THREE from 'three';
-import { blobShadow, rigCharacter, starShape } from './models.js';
+import { blobShadow, rigCharacter, starShape, textTexture } from './models.js';
 
 const matCache = new Map();
 // Physically based material (soft, slightly rough) so Tyler reads as "real" next to the toon world.
@@ -116,10 +116,12 @@ function buildTorso(upper) {
   const cummer = part(cyl(0.29, 0.29, 0.15, 24), vest, 0, 0.22, 0, upper);
   cummer.scale.z = 0.72;
 
-  // Silver six-point star on his left chest, name tape on his right (blank).
+  // Silver six-point star on his left chest, CIUCCI name tape on his right.
   const star = part(new THREE.ExtrudeGeometry(starShape(6, 0.045, 0.025), { depth: 0.008, bevelEnabled: false }), pbr(C.silver, { rough: 0.35, metal: 0.3, emissive: 0x555555 }), 0.1, 0.5, 0.205, upper);
   star.rotation.x = -0.04;
-  part(box(0.11, 0.028, 0.006), pbr(0x2a2b30), -0.1, 0.52, 0.206, upper);
+  part(box(0.13, 0.036, 0.006), pbr(0x2a2b30), -0.1, 0.52, 0.206, upper);
+  const tape = part(new THREE.PlaneGeometry(0.124, 0.03), new THREE.MeshBasicMaterial({ map: textTexture('CIUCCI', { w: 256, h: 64, bg: '#2a2b30', fg: '#e6e6e6', font: '900 54px system-ui, sans-serif' }) }), -0.1, 0.52, 0.2095, upper);
+  tape.rotation.x = -0.04;
   // Small body camera with a status light.
   part(box(0.05, 0.065, 0.025), pbr(0x101010, { rough: 0.4 }), 0.02, 0.33, 0.215, upper);
   part(sph(0.007, 8, 6), pbr(0xffd23f, { emissive: 0x665500 }), 0.02, 0.32, 0.229, upper);

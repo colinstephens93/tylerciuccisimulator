@@ -67,7 +67,7 @@ export function makeFoodTruck() {
   return g;
 }
 
-// ATF Agent Dan, modeled after reference photos with realistic proportions to match Tyler:
+// ATF Agent Dan Reiner, modeled after reference photos with realistic proportions to match Tyler:
 // a big, heavyset guy with a round face and rosy cheeks, strawberry-blond hair in a swept-back
 // pompadour with short sides, a full ginger beard and mustache, light blue-grey eyes and black
 // rectangular glasses. Navy "ATF" windbreaker over a white shirt and light-blue floral tie,
@@ -195,6 +195,12 @@ export function makeDan() {
   atf.position.set(0, 0.45, -0.262);
   atf.rotation.y = Math.PI;
   upper.add(atf);
+  // REINER under the ATF on the back, and a name patch on his right chest.
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.08), new THREE.MeshBasicMaterial({ map: textTexture('REINER', { w: 256, h: 52, bg: null, fg: '#ffd23f', font: '900 44px system-ui, sans-serif' }), transparent: true }));
+  back.position.set(0, 0.32, -0.262);
+  back.rotation.y = Math.PI;
+  upper.add(back);
+  part(new THREE.PlaneGeometry(0.13, 0.036), new THREE.MeshBasicMaterial({ map: textTexture('REINER', { w: 256, h: 70, bg: '#ffd23f', fg: '#1f2a44', font: '900 54px system-ui, sans-serif' }) }), -0.13, 0.48, 0.255, upper).rotation.y = -0.18;
 
   // Arms in long windbreaker sleeves.
   const arms = [];

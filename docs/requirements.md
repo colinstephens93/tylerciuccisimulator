@@ -51,11 +51,11 @@ The player is Deputy Tyler Ciucci, a School Resource Officer, in Lawrenceville, 
 
 ## 5. Character and setting
 
-- Tyler (modeled on the reference photo, realistic proportions and soft physically based shading, a little larger than life so he reads on a phone): stocky build, short dark-brown hair with faded sides, full mustache with light stubble, black short-sleeve uniform shirt, black plate-carrier vest (silver six-point star, blank name tape, magazine and radio pouches, body camera, flashlight), clear coil earpiece, black duty pants and boots, duty belt with a gold star badge and holster, black watch on the left wrist, bracelet on the right, phone with a red grip in his right hand. No real agency patches, names or numbers. Other characters (except Dan) stay cartoon-styled.
+- Tyler (modeled on the reference photo, realistic proportions and soft physically based shading, a little larger than life so he reads on a phone): stocky build, short dark-brown hair with faded sides, full mustache with light stubble, black short-sleeve uniform shirt, black plate-carrier vest (silver six-point star, CIUCCI name tape, magazine and radio pouches, body camera, flashlight), clear coil earpiece, black duty pants and boots, duty belt with a gold star badge and holster, black watch on the left wrist, bracelet on the right, phone with a red grip in his right hand. No real agency patches or numbers; last names on name tapes. Other characters (except Dan) stay cartoon-styled.
 - Patrol car: dark body, white doors, "SHERIFF" text, light bar. Generic markings only (set in config).
-- Places: a generic house on Honeysuckle Avenue (not his address), El Cregs (a made-up flauta food truck on West Pike Street where ATF Agent Dan hangs out), a made-up Wawa on West Pike Street, a fictional school on New Hope Road (name in config), and the courthouse square.
+- Places: a generic house on Honeysuckle Avenue (not his address), El Cregs (a made-up flauta food truck; no real truck by that name on West Pike Street where ATF Agent Dan hangs out), a made-up Wawa on West Pike Street, a fictional school on New Hope Road (name in config), and the courthouse square.
 - Amanda (Tyler's wife) appears only as affectionate mission briefs.
-- ATF Agent Dan: Tyler's friend, modeled on reference photos in the same realistic style as Tyler and a bit bigger: heavyset, round face with rosy cheeks, strawberry-blond swept-back pompadour, full ginger beard, black rectangular glasses. Navy "ATF" windbreaker over a white shirt and light-blue floral tie, khakis. The Morning Run starts by meeting him (it's about flautas, not a case). In free roam he chats when Tyler walks up.
+- ATF Agent Dan Reiner: Tyler's friend (he knows he's in the game), modeled on reference photos in the same realistic style as Tyler and a bit bigger: heavyset, round face with rosy cheeks, strawberry-blond swept-back pompadour, full ginger beard, black rectangular glasses. Navy windbreaker with "ATF" and "REINER" on the back and a REINER chest patch, over a white shirt and light-blue floral tie, khakis. The Morning Run starts by meeting him (it's about flautas, not a case). In free roam he chats when Tyler walks up.
 
 ## 5a. Technical constraints
 
@@ -67,7 +67,7 @@ The player is Deputy Tyler Ciucci, a School Resource Officer, in Lawrenceville, 
 
 ## 6. Real people and brands
 
-- Tyler and Amanda know about the game; depiction stays respectful and good-natured.
+- Tyler, Amanda and Dan know about the game; depiction stays respectful and good-natured.
 - Wawa and Ghost Energy are referenced by name as a friends-only, non-commercial homage; no real logos.
 - No real school name, badge number or plate unless Tyler approves.
 
