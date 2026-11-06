@@ -52,7 +52,7 @@ Progress (coins, cans, mission records) and sound settings are saved in the brow
 | Path | Purpose |
 | --- | --- |
 | `src/game.js` | Main loop: player on foot or driving, collisions between everything, missions, heat and Sarge, HUD data |
-| `src/engine/` | `world.js` (renderer, chase camera, shake, labels), `input.js` (joystick, buttons, keyboard), `models.js` (cartoon characters, cars, props, landmarks), `fx.js` (particles) |
+| `src/engine/` | `world.js` (renderer, chase camera, shake, labels), `input.js` (joystick, buttons, keyboard), `models.js` (cartoon characters, shared animation rig, cars, props, landmarks), `tyler.js` (detailed Tyler model from the reference photo), `fx.js` (particles) |
 | `src/player/onFoot.js` | Tyler's on-foot controller (camera-relative movement, jump, kick) |
 | `src/sim/` | `vehicle.js` (arcade car physics, drift, bounces), `traffic.js`, `peds.js`, `props.js`, `pickups.js` (coins, Ghost cans), `colliders.js` (spatial collision grid), `roadnet.js` (lanes for AI) |
 | `src/missions/` | `logic.js` (pure mission rules, tested), `runner.js` (beacons, spawned targets) |

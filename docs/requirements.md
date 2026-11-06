@@ -51,7 +51,7 @@ The player is Deputy Tyler Ciucci, a School Resource Officer, in Lawrenceville, 
 
 ## 5. Character and setting
 
-- Tyler: tall, stocky, short dark hair, full short beard, black uniform polo, silver six-point star, duty belt with gold belt badge, black wristband. No real agency patches or insignia.
+- Tyler (modeled on the reference photo, realistic proportions and soft physically based shading, a little larger than life so he reads on a phone): stocky build, short dark-brown hair with faded sides, full mustache with light stubble, black short-sleeve uniform shirt, black plate-carrier vest (silver six-point star, blank name tape, magazine and radio pouches, body camera, flashlight), clear coil earpiece, black duty pants and boots, duty belt with a gold star badge and holster, black watch on the left wrist, bracelet on the right, phone with a red grip in his right hand. No real agency patches, names or numbers. Other characters stay cartoon-styled.
 - Patrol car: dark body, white doors, "SHERIFF" text, light bar. Generic markings only (set in config).
 - Places: a generic house on Honeysuckle Avenue (not his address), a made-up Wawa on West Pike Street, a fictional school on New Hope Road (name in config), and the courthouse square.
 - Amanda (Tyler's wife) appears only as affectionate mission briefs.

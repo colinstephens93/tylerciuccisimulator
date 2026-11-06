@@ -8,8 +8,9 @@ import missions from './data/missions.json';
 import { World } from './engine/world.js';
 import { Controls } from './engine/input.js';
 import { Fx } from './engine/fx.js';
+import { makeTyler } from './engine/tyler.js';
 import {
-  makeTyler, makePatrolCar, makeHouse, makeWawa, makeSchool, makeArrow, makeMissionMarker, LANDMARK_BOXES,
+  makePatrolCar, makeHouse, makeWawa, makeSchool, makeArrow, makeMissionMarker, LANDMARK_BOXES,
 } from './engine/models.js';
 import { toWorld, angleLerp, angleDiff } from './engine/util.js';
 import { buildCity } from './map/cityMesh.js';

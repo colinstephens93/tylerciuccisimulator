@@ -46,3 +46,4 @@
 | 42 | 2026-11-06 | Coins are the score; 20 hidden Ghost cans are the collectible set | Exploration reward loop |
 | 43 | 2026-11-06 | Missions are data in `src/data/missions.json`, validated by tests | Easy to add more without code |
 | 44 | 2026-11-06 | Keep the full real Lawrenceville map; only simulate traffic and people near the player | Recognizable town; phone performance |
+| 45 | 2026-11-06 | Tyler uses a detailed, realistically proportioned model (mustache, plate carrier, short sleeves) matching the reference photo; the rest of the world stays cartoon | User request: Tyler should look much more like the photo |

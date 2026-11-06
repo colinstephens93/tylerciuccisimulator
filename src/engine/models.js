@@ -64,7 +64,7 @@ function signPlane(text, width, height, opts) {
   return new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: textTexture(text, opts) }));
 }
 
-function starShape(points = 6, outer = 1, inner = 0.55) {
+export function starShape(points = 6, outer = 1, inner = 0.55) {
   const s = new THREE.Shape();
   for (let i = 0; i <= points * 2; i++) {
     const r = i % 2 ? inner : outer;
@@ -197,7 +197,23 @@ export function makeCharacter({
 
   const shadow = blobShadow(0.7);
   root.add(shadow);
+  rigCharacter(root, { inner, upper, head, legs, arms, shadow, torso });
+  return root;
+}
 
+// Procedural animation shared by every character: walk/run cycle, jump, kick, tumble,
+// lying down, panic, and springy squash and stretch. Optional knees and elbows bend
+// for the more detailed (realistic) Tyler model.
+export function rigCharacter(root, { inner, upper, head, legs, arms, shadow, torso, hipY = 0.9, knees = null, elbows = null, shadowSize = 0.7, squashScale = 1 }) {
+  const bend = (amp, air, pose) => {
+    if (knees) {
+      for (let i = 0; i < 2; i++) {
+        const back = Math.max(0, legs[i].rotation.x);
+        knees[i].rotation.x = pose === 'fly' ? 0.9 : air ? 1.1 - i * 0.6 : back * 1.5 + 0.08 + amp * 0.15;
+      }
+    }
+    if (elbows) for (const e of elbows) e.rotation.x = pose === 'fly' ? -0.4 : -0.25 - amp * 1.0;
+  };
   const rig = {
     inner, upper, head, legs, arms, shadow,
     phase: 0, t: 0, squash: 0, squashV: 0, tumble: 0, kickT: 0,
@@ -210,13 +226,14 @@ export function makeCharacter({
       // Springy squash and stretch.
       this.squashV += (-this.squash * 180 - this.squashV * 14) * dt;
       this.squash += this.squashV * dt;
-      const sq = Math.max(-0.35, Math.min(0.35, this.squash));
+      const sq = Math.max(-0.35, Math.min(0.35, this.squash)) * squashScale;
       inner.scale.set(1 - sq * 0.5, 1 + sq, 1 - sq * 0.5);
       shadow.position.y = 0.06 - height;
       const sh = Math.max(0.3, 1 - height * 0.08);
-      shadow.scale.set(0.7 * sh, 1, 0.7 * sh);
+      shadow.scale.set(shadowSize * sh, 1, shadowSize * sh);
 
       if (pose === 'fly') {
+        bend(0, true, 'fly');
         this.tumble += dt * 9;
         inner.rotation.x = this.tumble;
         inner.position.y = 1;
@@ -235,6 +252,7 @@ export function makeCharacter({
           legs[i].rotation.x = 0;
           legs[i].rotation.z = (i ? 1 : -1) * 0.3;
         }
+        bend(0, false, 'down');
         return;
       }
       this.tumble = 0;
@@ -247,7 +265,7 @@ export function makeCharacter({
       if (!air) this.phase += dt * (3 + speed * 1.5);
       const s = Math.sin(this.phase);
       upper.rotation.x = Math.min(0.3, speed * 0.025);
-      upper.position.y = 0.9 + (air ? 0 : Math.abs(Math.cos(this.phase)) * 0.13 * amp);
+      upper.position.y = hipY + (air ? 0 : Math.abs(Math.cos(this.phase)) * 0.13 * amp * hipY);
       torso.scale.y = 1 + Math.sin(this.t * 2.2) * 0.02;
       head.rotation.z = Math.sin(this.phase) * 0.06 * amp;
 
@@ -267,6 +285,7 @@ export function makeCharacter({
         arms[0].rotation.set(-s * amp * 0.9, 0, -0.12 - amp * 0.1);
         arms[1].rotation.set(s * amp * 0.9, 0, 0.12 + amp * 0.1);
       }
+      bend(amp, air, pose);
       if (this.kickT > 0) {
         this.kickT -= dt;
         const k = Math.sin((1 - this.kickT / 0.35) * Math.PI);
@@ -275,19 +294,12 @@ export function makeCharacter({
         upper.rotation.x = -0.35 * k;
         arms[0].rotation.set(0, 0, -1.4 * k);
         arms[1].rotation.set(0, 0, 1.4 * k);
+        if (knees) knees[1].rotation.x = 0.1;
       }
     },
   };
   root.userData.rig = rig;
-  return root;
-}
-
-// Tyler: tall and stocky, short dark hair, full short beard, black uniform polo,
-// silver six-point star, duty belt with gold belt badge, black wristband.
-export function makeTyler() {
-  const t = makeCharacter({ shirt: 0x1d2028, pants: 0x1a1c22, hair: 0x3b2a1e, beard: 0x5a3a24, skin: 0xeab08e, deputy: true, build: 1.22, headScale: 1.4 });
-  t.scale.setScalar(1.15);
-  return t;
+  return rig;
 }
 
 const SHIRTS = [0xff5a5f, 0x3fa9f5, 0xffc93c, 0x6dd47e, 0xb084f5, 0xff8c42, 0x2ec4b6, 0xf15bb5, 0xffffff];

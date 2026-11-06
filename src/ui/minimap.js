@@ -77,6 +77,7 @@ export class Minimap {
   draw(view) {
     if (++this.frame % 2) return; // 30 fps is plenty
     this.resize();
+    if (this.size < 20) return; // not laid out (HUD hidden)
     const g = this.ctx;
     const S = this.size;
     const R = S / 2;
