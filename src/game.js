@@ -9,6 +9,7 @@ import { World } from './engine/world.js';
 import { Controls } from './engine/input.js';
 import { Fx } from './engine/fx.js';
 import { makeTyler } from './engine/tyler.js';
+import { makeFoodTruck, makeDan } from './engine/elcregs.js';
 import {
   makePatrolCar, makeHouse, makeWawa, makeSchool, makeArrow, makeMissionMarker, LANDMARK_BOXES,
 } from './engine/models.js';
@@ -27,7 +28,7 @@ import { MissionRunner } from './missions/runner.js';
 import { formatTimer } from './missions/logic.js';
 import { Heat, bustedFine } from './logic/heat.js';
 import { Hud } from './ui/hud.js';
-import { titleScreen, loadingScreen, clearScreen, briefCard, resultCard, closeCards, pauseMenu } from './ui/screens.js';
+import { titleScreen, loadingScreen, clearScreen, briefCard, resultCard, closeCards, pauseMenu, dialogueCard } from './ui/screens.js';
 import { $ } from './ui/dom.js';
 import { vert } from './map/graph.js';
 
@@ -69,6 +70,7 @@ export class Game {
     put(makeWawa(), places.wawa);
     put(makeSchool(), places.school);
     for (const p of Object.values(places)) p.marker = this.openSpot(p.marker[0], p.marker[1], 2.5);
+    this.npcs = { dan: this.buildElCregs(places.elcregs) };
 
     let minX = Infinity; let maxX = -Infinity; let minZ = Infinity; let maxZ = -Infinity;
     for (let i = 0; i < map.verts.length; i += 2) {
@@ -149,6 +151,61 @@ export class Game {
       return [px, pz];
     }
     return null;
+  }
+
+  // El Cregs flauta truck parked by the roadside, with ATF Agent Dan out front.
+  buildElCregs(p) {
+    const truck = makeFoodTruck();
+    const rot = p.rot; // local +z points at the road
+    let [tx, tz] = toWorld(p.marker[0], p.marker[1], rot, 0, -4.5);
+    [tx, tz] = this.openSpot(tx, tz, 3.5);
+    truck.position.set(tx, 0, tz);
+    truck.rotation.y = rot - Math.PI / 2; // serving window faces the road
+    this.world.scene.add(truck);
+    this.colliders.addBox(tx, tz, truck.userData.width / 2, truck.userData.length / 2, rot - Math.PI / 2);
+    const [dx, dz] = toWorld(tx, tz, rot, 1.2, 3.4);
+    const model = makeDan();
+    model.position.set(dx, 0, dz);
+    model.rotation.y = rot;
+    this.world.scene.add(model);
+    this.colliders.addCircle(dx, dz, 0.5, 'npc');
+    p.marker = [dx, dz];
+    this.world.addLabel('El Cregs', () => truck.position.clone().setY(6.5), 'label', 140);
+    return { key: 'dan', label: 'Agent Dan', model, rig: model.userData.rig, x: dx, z: dz, heading: rot, baseHeading: rot, wave: 0, chatter: 0 };
+  }
+
+  // Dan idles by the truck, turns to face Tyler, and waves him over.
+  updateNpcs(dt, px, pz) {
+    for (const n of Object.values(this.npcs)) {
+      const d = Math.hypot(px - n.x, pz - n.z);
+      const want = d < 18 ? Math.atan2(px - n.x, pz - n.z) : n.baseHeading;
+      n.heading = angleLerp(n.heading, want, Math.min(1, dt * 4));
+      n.model.rotation.y = n.heading;
+      n.rig.update(dt, { speed: 0 });
+      if (d < 30 && d > 3.5 && this.mission?.run.stage.npc === n.key) {
+        n.wave += dt;
+        n.rig.arms[1].rotation.set(0, 0, 2.6 + Math.sin(n.wave * 10) * 0.35);
+      }
+      // In free roam, Dan has a word for Tyler when he walks up.
+      n.chatter -= dt;
+      if (!this.mission && !this.driving && d < 3 && n.chatter <= 0) {
+        n.chatter = 12;
+        const lines = ['Flautas are on me today, Deputy.', 'Quiet morning. Want a flauta?', 'Salsa verde. Trust me.', "Don't tell Amanda I keep feeding you."];
+        this.world.popText(lines[Math.floor(Math.random() * lines.length)], n.model.position.clone().setY(3.2), 'pop say', 2600);
+        audio.sfx('ding');
+      }
+    }
+  }
+
+  // A conversation card (the mission clock is paused by the runner meanwhile).
+  talkTo(key, lines, onDone) {
+    const n = this.npcs[key];
+    this.foot.heading = Math.atan2(n.x - this.foot.x, n.z - this.foot.z);
+    this.foot.vx = 0;
+    this.foot.vz = 0;
+    this.modal = true;
+    audio.sfx('ding');
+    dialogueCard(lines, () => { closeCards(); this.modal = false; onDone(); });
   }
 
   buildMarkers() {
@@ -253,6 +310,7 @@ export class Game {
   pause() {
     if (this.mode !== 'play' || this.world.paused) return;
     if (this.modal) { closeCards(); this.modal = false; } // the pause menu replaces any open card
+    if (this.mission?.talking) this.mission.talking = false; // walk up to Dan again to finish the chat
     this.world.paused = true;
     this.controls.show(false);
     audio.engine(null);
@@ -329,6 +387,7 @@ export class Game {
     this.updatePickups(dt, px, pz);
     this.fx.update(dt);
     this.updateMarkers(dt, px, pz);
+    this.updateNpcs(dt, px, pz);
     if (this.mission) this.updateMission(dt);
     this.updateHeat(dt, px, pz);
     this.updateArrow(dt, px, pz);

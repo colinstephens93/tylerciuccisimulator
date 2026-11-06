@@ -1,10 +1,10 @@
 // Mission rules: stages, timers and progress. Pure module (no Three.js), unit tested.
 // The 3D side (beacons, spawned targets) lives in missions/runner.js.
 
-export const STAGE_TYPES = ['reach', 'collect', 'smash', 'pursuit'];
+export const STAGE_TYPES = ['reach', 'meet', 'collect', 'smash', 'pursuit'];
 
 export function stageGoal(stage) {
-  if (stage.type === 'reach') return 1;
+  if (stage.type === 'reach' || stage.type === 'meet') return 1;
   if (stage.type === 'pursuit') return stage.hits;
   return stage.count;
 }
@@ -66,7 +66,7 @@ export class MissionRun {
   // Text for the objective pill, e.g. "Collect Ghost cans 3/8".
   objective() {
     const s = this.stage;
-    const count = s.type === 'reach' ? '' : ` ${this.progress}/${this.goal}`;
+    const count = s.type === 'reach' || s.type === 'meet' ? '' : ` ${this.progress}/${this.goal}`;
     return `${s.text}${count}`;
   }
 }
@@ -77,7 +77,7 @@ export function formatTimer(seconds) {
 }
 
 // Validates mission data so bad edits are caught by the tests, not by players.
-export function validateMissions(missions, placeKeys) {
+export function validateMissions(missions, placeKeys, npcKeys = ['dan']) {
   const errors = [];
   const ids = new Set();
   for (const m of missions) {
@@ -88,7 +88,9 @@ export function validateMissions(missions, placeKeys) {
     for (const s of m.stages || []) {
       if (!STAGE_TYPES.includes(s.type)) errors.push(`${m.id}: bad stage type ${s.type}`);
       if (!(s.time > 0)) errors.push(`${m.id}: stage needs a time`);
-      if (s.type === 'reach' && !placeKeys.includes(s.target)) errors.push(`${m.id}: unknown target ${s.target}`);
+      if ((s.type === 'reach' || s.type === 'meet') && !placeKeys.includes(s.target)) errors.push(`${m.id}: unknown target ${s.target}`);
+      if (s.type === 'meet' && !npcKeys.includes(s.npc)) errors.push(`${m.id}: unknown npc ${s.npc}`);
+      if (s.type === 'meet' && (!s.npc || !s.dialogue?.length || s.dialogue.some((d) => !d.who || !d.line))) errors.push(`${m.id}: meet stage needs an npc and dialogue`);
       if ((s.type === 'collect' || s.type === 'smash') && !(s.count > 0)) errors.push(`${m.id}: stage needs a count`);
       if (s.type === 'pursuit' && !(s.hits > 0)) errors.push(`${m.id}: stage needs hits`);
     }

@@ -194,10 +194,10 @@ export class World {
   }
 
   // Short-lived cartoon text ("SMASH!", "+3") that pops up at a world point.
-  popText(text, pos, className = 'pop') {
+  popText(text, pos, className = 'pop', ms = 900) {
     const p = pos.clone();
     const l = this.addLabel(text, () => p, className);
-    setTimeout(() => l.remove(), 900);
+    setTimeout(() => l.remove(), ms);
   }
 
   clearLabels() {

@@ -35,6 +35,14 @@ export class MissionRunner {
       this.beacon.position.set(p.marker[0], 0, p.marker[1]);
       g.world.scene.add(this.beacon);
       this.beaconLabel = g.world.addLabel(p.label, () => this.beacon.position.clone().setY(13), 'label dest');
+    } else if (s.type === 'meet') {
+      const npc = g.npcs[s.npc];
+      this.beacon = makeBeacon(0x3fa9f5);
+      this.beacon.position.set(npc.x, 0, npc.z);
+      g.world.scene.add(this.beacon);
+      this.beaconLabel = g.world.addLabel(npc.label, () => this.beacon.position.clone().setY(13), 'label dest');
+      this.hinted = false;
+      this.talking = false;
     } else if (s.type === 'collect') {
       const [px, pz] = g.playerPos();
       for (let i = 0; i < s.count; i++) {
@@ -83,6 +91,10 @@ export class MissionRunner {
       const p = this.game.places[s.target];
       return { x: p.marker[0], z: p.marker[1] };
     }
+    if (s.type === 'meet') {
+      const npc = this.game.npcs[s.npc];
+      return { x: npc.x, z: npc.z };
+    }
     if (s.type === 'pursuit' && this.speeder) return { x: this.speeder.x, z: this.speeder.z };
     if (s.type === 'collect' && this.cans.length) {
       const [px, pz] = this.game.playerPos();
@@ -129,6 +141,7 @@ export class MissionRunner {
 
   update(dt) {
     const g = this.game;
+    if (this.talking) return; // the clock stops while Tyler and Dan chat
     this.run.tick(dt);
     this.hitCooldown -= dt;
     if (this.run.status !== 'active') return;
@@ -139,6 +152,16 @@ export class MissionRunner {
       const p = g.places[s.target];
       if (Math.hypot(p.marker[0] - px, p.marker[1] - pz) < REACH_RADIUS) this.advance();
     }
+    if (s.type === 'meet') {
+      // He has to stop, get out, and walk up to Dan.
+      const npc = g.npcs[s.npc];
+      const d = Math.hypot(npc.x - px, npc.z - pz);
+      if (g.driving && d < 25 && !this.hinted) { this.hinted = true; this.messages.push(s.hint); }
+      if (!g.driving && d < 3.2) {
+        this.talking = true;
+        g.talkTo(s.npc, s.dialogue, () => { this.talking = false; this.advance(); });
+      }
+    }
     if (s.type === 'pursuit' && this.speeder && Math.hypot(this.speeder.x - px, this.speeder.z - pz) > LOSE_DISTANCE) this.run.fail('lost');
 
     // GPS route for the mini-map, refreshed now and then.
@@ -146,7 +169,7 @@ export class MissionRunner {
     if (this.routeTimer <= 0) {
       this.routeTimer = 1.5;
       const t = this.target();
-      this.route = s.type === 'reach' && t ? gpsRoute(g.graph, px, pz, g.places[s.target]) : null;
+      this.route = (s.type === 'reach' || s.type === 'meet') && t ? gpsRoute(g.graph, px, pz, g.places[s.target]) : null;
     }
   }
 

@@ -44,15 +44,15 @@ Progress (coins, cans, mission records) and sound settings are saved in the brow
 | File | What it controls |
 | --- | --- |
 | `src/config/game.config.json` | Names, patrol car colors, walk/run/jump speeds, traffic and pedestrian counts, number of hidden cans, max pixel ratio |
-| `src/data/missions.json` | Missions: who sends them, brief text, stages (`reach`, `collect`, `smash`, `pursuit`), time limits, rewards. Checked by `npm test` |
-| `src/config/places.json` | Where the house, Wawa, school and the square sit on the map |
+| `src/data/missions.json` | Missions: who sends them, brief text, stages (`reach`, `meet`, `collect`, `smash`, `pursuit`; a `meet` stage has dialogue lines), time limits, rewards. Checked by `npm test` |
+| `src/config/places.json` | Where the house, Wawa, school, El Cregs and the square sit on the map |
 
 ## Code map
 
 | Path | Purpose |
 | --- | --- |
 | `src/game.js` | Main loop: player on foot or driving, collisions between everything, missions, heat and Sarge, HUD data |
-| `src/engine/` | `world.js` (renderer, chase camera, shake, labels), `input.js` (joystick, buttons, keyboard), `models.js` (cartoon characters, shared animation rig, cars, props, landmarks), `tyler.js` (detailed Tyler model from the reference photo), `fx.js` (particles) |
+| `src/engine/` | `world.js` (renderer, chase camera, shake, labels), `input.js` (joystick, buttons, keyboard), `models.js` (cartoon characters, shared animation rig, cars, props, landmarks), `tyler.js` (detailed Tyler model from the reference photo), `elcregs.js` (El Cregs food truck and Agent Dan), `fx.js` (particles) |
 | `src/player/onFoot.js` | Tyler's on-foot controller (camera-relative movement, jump, kick) |
 | `src/sim/` | `vehicle.js` (arcade car physics, drift, bounces), `traffic.js`, `peds.js`, `props.js`, `pickups.js` (coins, Ghost cans), `colliders.js` (spatial collision grid), `roadnet.js` (lanes for AI) |
 | `src/missions/` | `logic.js` (pure mission rules, tested), `runner.js` (beacons, spawned targets) |

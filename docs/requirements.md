@@ -34,7 +34,7 @@ The player is Deputy Tyler Ciucci, a School Resource Officer, in Lawrenceville, 
 
 ### Missions
 - Started by walking or driving slowly into a yellow `!` marker, which shows a short brief from a character (Amanda, Sarge, Coach, the Wawa clerk). Players can decline.
-- Stage types: `reach` (timed drive to a place, with GPS arrow, beacon and mini-map route), `collect` (grab N cans scattered nearby), `smash` (break N props), `pursuit` (ram a fleeing car N times before it escapes).
+- Stage types: `reach` (timed drive to a place, with GPS arrow, beacon and mini-map route), `meet` (get to a character, stop, get out and walk up to them for a short conversation; the timer pauses while talking), `collect` (grab N cans scattered nearby), `smash` (break N props), `pursuit` (ram a fleeing car N times before it escapes).
 - Each stage has its own timer. Rewards are coins; best times are saved. Failing offers Retry (from the mission start) or back to free roam.
 - Data-driven: `src/data/missions.json`, validated by unit tests.
 
@@ -53,8 +53,9 @@ The player is Deputy Tyler Ciucci, a School Resource Officer, in Lawrenceville, 
 
 - Tyler (modeled on the reference photo, realistic proportions and soft physically based shading, a little larger than life so he reads on a phone): stocky build, short dark-brown hair with faded sides, full mustache with light stubble, black short-sleeve uniform shirt, black plate-carrier vest (silver six-point star, blank name tape, magazine and radio pouches, body camera, flashlight), clear coil earpiece, black duty pants and boots, duty belt with a gold star badge and holster, black watch on the left wrist, bracelet on the right, phone with a red grip in his right hand. No real agency patches, names or numbers. Other characters stay cartoon-styled.
 - Patrol car: dark body, white doors, "SHERIFF" text, light bar. Generic markings only (set in config).
-- Places: a generic house on Honeysuckle Avenue (not his address), a made-up Wawa on West Pike Street, a fictional school on New Hope Road (name in config), and the courthouse square.
+- Places: a generic house on Honeysuckle Avenue (not his address), El Cregs (a made-up flauta food truck on West Pike Street where ATF Agent Dan hangs out), a made-up Wawa on West Pike Street, a fictional school on New Hope Road (name in config), and the courthouse square.
 - Amanda (Tyler's wife) appears only as affectionate mission briefs.
+- ATF Agent Dan: Tyler's friend, waits at El Cregs in a navy "ATF" windbreaker, khakis, cap and sunglasses. The Morning Run starts by meeting him (it's about flautas, not a case). In free roam he chats when Tyler walks up.
 
 ## 5a. Technical constraints
 

@@ -61,6 +61,27 @@ export function resultCard({ title, lines, primary, secondary }) {
     )), '#overlay');
 }
 
+// Conversation shown one line at a time; tap to advance.
+export function dialogueCard(lines, onDone) {
+  let i = 0;
+  const avatar = h('span', { class: 'avatar' });
+  const name = h('b');
+  const bubble = h('div', { class: 'bubble' });
+  const next = h('button', { class: 'btn gold', onclick: () => { i++; if (i < lines.length) render(); else onDone(); } });
+  const render = () => {
+    const l = lines[i];
+    avatar.textContent = l.who[0];
+    avatar.className = `avatar ${l.who === 'Tyler' ? 'tyler' : ''}`;
+    name.textContent = l.who === 'Dan' ? 'Agent Dan (ATF)' : l.who;
+    bubble.textContent = l.line;
+    bubble.className = `bubble ${l.who === 'Tyler' ? 'me' : ''}`;
+    next.textContent = i + 1 < lines.length ? 'Next' : 'Got it';
+  };
+  render();
+  return show(h('div', { class: 'card-wrap' },
+    h('div', { class: 'brief talk' }, h('div', { class: 'from' }, avatar, h('div', {}, name, h('small', {}, 'El Cregs'))), bubble, h('div', { class: 'row2' }, next))), '#overlay');
+}
+
 export function closeCards() {
   $('#overlay').replaceChildren();
 }
