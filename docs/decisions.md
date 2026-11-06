@@ -3,7 +3,7 @@
 | # | Date | Decision | Reason |
 | --- | --- | --- | --- |
 | 1 | 2026-11-05 | Mobile-first web game, playable in the browser | Easy to share by link, no install |
-| 2 | 2026-11-05 | MVP = drive to Wawa, order breakfast + energy drink, drive to school | Initial game concept |
+| 2 | 2026-11-05 | (Superseded by #37) MVP = drive to Wawa, order breakfast + energy drink, drive to school | Initial game concept |
 | 3 | 2026-11-05 | Requirements and decisions are documented in this repo under `docs/` | Single source of truth |
 | 4 | 2026-11-05 | Officer is named Tyler Ciucci; sprite based on a user-supplied photo | User request |
 | 5 | 2026-11-05 | Breakfast is always a breakfast sandwich; drink is always Ghost Energy | Matches Tyler's real routine |
@@ -38,3 +38,11 @@
 | 34 | 2026-11-05 | Ground layers (roads, curbs, parks) drawn as unlit, ordered decals | Removes road flicker and jagged patches on phone GPUs |
 | 35 | 2026-11-05 | Drive routes smoothed into curves; car auto-slows for tight corners | Removes sideways jerks at corners |
 | 36 | 2026-11-05 | clockSpeed lowered from 15 to 12 | Corner slowdowns made drives longer; keeps typical arrival near 7:45 |
+| 37 | 2026-11-06 | Refactor into a free-roam sandbox (free driving and running, any car, light chaos, short missions) instead of the linear Morning Run | New core vision: open-city sandbox feel |
+| 38 | 2026-11-06 | Touch controls: floating virtual joystick + action buttons; camera-relative movement on foot, joystick steer/throttle in cars | Standard, one-hand-each mobile controls |
+| 39 | 2026-11-06 | The Morning Run and the Amanda gag live on as missions; the Wawa interior, clock/bell, Amanda mood calls and Wawa scoring were removed | Fit the sandbox loop; keep the jokes |
+| 40 | 2026-11-06 | Chaos raises a HEAT meter; full heat sends "Sarge" after you, and getting caught costs coins | Consequences for chaos without game over |
+| 41 | 2026-11-06 | Pedestrians are knocked flying cartoon-style and always get back up | Keeps the tone light |
+| 42 | 2026-11-06 | Coins are the score; 20 hidden Ghost cans are the collectible set | Exploration reward loop |
+| 43 | 2026-11-06 | Missions are data in `src/data/missions.json`, validated by tests | Easy to add more without code |
+| 44 | 2026-11-06 | Keep the full real Lawrenceville map; only simulate traffic and people near the player | Recognizable town; phone performance |

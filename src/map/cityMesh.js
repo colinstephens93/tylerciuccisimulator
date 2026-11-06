@@ -1,16 +1,17 @@
 // Builds the 3D town from OpenStreetMap data: ground, roads, buildings, parks, water, trees.
+// Also fills the collision grids (buildings, tree trunks) and the road grid.
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import { toon } from '../engine/models.js';
+import { toon, toonRamp } from '../engine/models.js';
 import { vert } from './graph.js';
 
 // Flat ground layers are drawn as decals: no depth test or depth write, painted in a fixed
 // order (renderOrder) before anything that stands on the ground. Stacking them at slightly
 // different heights instead causes z-fighting (flickering, jagged patches) on phone GPUs.
 const ROAD_LAYERS = [
-  { types: ['service', 'living_street'], color: 0x8f9297 },
-  { types: ['residential', 'unclassified', 'tertiary', 'tertiary_link'], color: 0x74787e },
-  { types: ['secondary', 'secondary_link', 'primary', 'primary_link', 'trunk', 'trunk_link', 'motorway', 'motorway_link'], color: 0x63676d },
+  { types: ['service', 'living_street'], color: 0x8c8f99 },
+  { types: ['residential', 'unclassified', 'tertiary', 'tertiary_link'], color: 0x5f6470 },
+  { types: ['secondary', 'secondary_link', 'primary', 'primary_link', 'trunk', 'trunk_link', 'motorway', 'motorway_link'], color: 0x4e535e },
 ];
 export const DECAL_ORDER = { ground: -100, parks: -95, water: -94, curb: -90, roads: -85, centerLines: -80, route: -75 };
 const Y = 0.02;
@@ -27,7 +28,11 @@ function asDecal(mesh, order) {
   mesh.renderOrder = order;
   return mesh;
 }
-const BUILDING_COLORS = [0xf2ede3, 0xe9e2d0, 0xdfe6ea, 0xf0e2d0, 0xe6d8c8, 0xd9e4d4, 0xeee7da];
+// Saturated cartoon pastels for walls, with a matching darker roof for each.
+const BUILDING_COLORS = [
+  [0xffd6a5, 0xc8553d], [0xfdffb6, 0x6a8d3a], [0xcaffbf, 0x2a7f62], [0x9bf6ff, 0x2f6fb0],
+  [0xa0c4ff, 0x3d4f9f], [0xffc6ff, 0x9b4f96], [0xffadad, 0xa33a3a], [0xfff1e6, 0x7a5c48],
+];
 
 // Flat ribbon (plus round joints) along a polyline, appended to a positions array.
 export function addRibbon(out, pts, halfWidth, y) {
@@ -112,17 +117,17 @@ function seeded(seed) {
   };
 }
 
-export function buildCity(map, clearZones) {
+export function buildCity(map, clearZones, colliders, roadGrid) {
   const city = new THREE.Group();
   const [W, H] = map.size;
 
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 1600, H + 1600), decalMaterial(0xa8c784));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(W + 1600, H + 1600), decalMaterial(0x8fd16a));
   ground.rotation.x = -Math.PI / 2;
   city.add(asDecal(ground, DECAL_ORDER.ground));
 
-  const parks = polygonMesh(map.parks, 0x7cab60, Y);
+  const parks = polygonMesh(map.parks, 0x6cc24a, Y);
   if (parks) city.add(asDecal(parks, DECAL_ORDER.parks));
-  const water = polygonMesh(map.water, 0x6fb7e0, Y);
+  const water = polygonMesh(map.water, 0x4fc3f7, Y);
   if (water) city.add(asDecal(water, DECAL_ORDER.water));
 
   // Roads: a light curb outline under each road, then the asphalt.
@@ -132,13 +137,14 @@ export function buildCity(map, clearZones) {
   for (const r of map.roads) {
     const pts = r.v.map((i) => vert(map, i));
     const li = ROAD_LAYERS.findIndex((l) => l.types.includes(r.t));
-    addRibbon(curb, pts, r.w / 2 + 0.9, Y);
+    addRibbon(curb, pts, r.w / 2 + (li === 0 ? 0.6 : 2.2), Y);
     addRibbon(layers[li], pts, r.w / 2, Y);
-    if (li === 2) addRibbon(centerLines, pts, 0.18, Y);
+    if (li === 2) addRibbon(centerLines, pts, 0.2, Y);
+    for (let i = 0; i < pts.length - 1; i++) roadGrid.addSegment(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], r.w / 2, r);
   }
-  city.add(asDecal(flatMesh(curb, 0xdcd5c4), DECAL_ORDER.curb));
+  city.add(asDecal(flatMesh(curb, 0xe8e2d2), DECAL_ORDER.curb));
   layers.forEach((pos, i) => city.add(asDecal(flatMesh(pos, ROAD_LAYERS[i].color), DECAL_ORDER.roads + i)));
-  city.add(asDecal(flatMesh(centerLines, 0xf2c94c), DECAL_ORDER.centerLines));
+  city.add(asDecal(flatMesh(centerLines, 0xffd23f), DECAL_ORDER.centerLines));
 
   // Buildings (skipping lots where we place our own Wawa, school and house)
   const isClear = (x, z) => clearZones.some((c) => Math.hypot(c.x - x, c.z - z) < c.r);
@@ -158,16 +164,21 @@ export function buildCity(map, clearZones) {
     }
     g.rotateX(-Math.PI / 2);
     g.deleteAttribute('uv');
-    color.setHex(BUILDING_COLORS[idx % BUILDING_COLORS.length]);
+    const [wall, roof] = BUILDING_COLORS[idx % BUILDING_COLORS.length];
     const n = g.attributes.position.count;
     const cols = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) color.toArray(cols, i * 3);
+    const normals = g.attributes.normal;
+    for (let i = 0; i < n; i++) {
+      color.setHex(normals.getY(i) > 0.5 ? roof : wall);
+      color.toArray(cols, i * 3);
+    }
     g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
     geos.push(g);
+    colliders.addPolygon(b.p);
   });
   if (geos.length) {
     const merged = mergeGeometries(geos);
-    city.add(new THREE.Mesh(merged, new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toon(0).gradientMap })));
+    city.add(new THREE.Mesh(merged, new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp })));
   }
 
   // Trees: pines and hardwoods in parks and along residential streets.
@@ -200,17 +211,18 @@ export function buildCity(map, clearZones) {
       }
     }
   }
-  const trees = spots.filter(([x, z]) => !isClear(x, z)).slice(0, 2600);
+  const trees = spots.filter(([x, z]) => !isClear(x, z) && roadGrid.edgeDistance(x, z, 6) > 2 && !colliders.blocked(x, z, 1.5)).slice(0, 2600);
+  for (const [x, z] of trees) colliders.addCircle(x, z, 0.7);
   const pines = trees.filter(() => rand() < 0.6);
   const hardwoods = trees.filter((t) => !pines.includes(t));
   city.add(instanced(pines, [
     [new THREE.CylinderGeometry(0.3, 0.4, 6, 6).translate(0, 3, 0), 0x6b4a2b],
-    [new THREE.ConeGeometry(2.6, 5, 7).translate(0, 7, 0), 0x2f6b3a],
-    [new THREE.ConeGeometry(2.0, 4, 7).translate(0, 9.5, 0), 0x3a7d45],
+    [new THREE.ConeGeometry(2.6, 5, 7).translate(0, 7, 0), 0x2f8f45],
+    [new THREE.ConeGeometry(2.0, 4, 7).translate(0, 9.5, 0), 0x3fae55],
   ], rand));
   city.add(instanced(hardwoods, [
     [new THREE.CylinderGeometry(0.35, 0.45, 3.5, 6).translate(0, 1.75, 0), 0x6b4a2b],
-    [new THREE.IcosahedronGeometry(3.2, 0).translate(0, 5.5, 0), 0x4f8f3a],
+    [new THREE.IcosahedronGeometry(3.2, 0).translate(0, 5.5, 0), 0x5cc23a],
   ], rand));
 
   return city;

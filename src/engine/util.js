@@ -12,7 +12,14 @@ export function angleLerp(a, b, t) {
   return a + d * t;
 }
 
-export const keys = new Set();
-window.addEventListener('keydown', (e) => keys.add(e.key.toLowerCase()));
-window.addEventListener('keyup', (e) => keys.delete(e.key.toLowerCase()));
-window.addEventListener('blur', () => keys.clear());
+export function angleDiff(a, b) {
+  return Math.atan2(Math.sin(b - a), Math.cos(b - a));
+}
+
+export function seeded(seed) {
+  let s = seed >>> 0;
+  return () => {
+    s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+    return s / 4294967296;
+  };
+}

@@ -1,6 +1,7 @@
 {
-  "_note": "Lot centers in local meters (x = east, z = south of the courthouse square). Each building faces the nearest point on its road. None of these are real addresses; the Wawa and school are fictional.",
-  "home": { "lot": [-933, -292], "road": "Honeysuckle Avenue", "clearRadius": 26 },
-  "wawa": { "lot": [-658, -148], "road": "West Pike Street", "clearRadius": 32 },
-  "school": { "lot": [832, 545], "road": "New Hope Road", "clearRadius": 55 }
+  "_note": "Lot centers in local meters (x = east, z = south of the courthouse square). Buildings face the nearest point on their road. Spots are open-air places (no building). None of these are real addresses; the Wawa and school are fictional.",
+  "home": { "lot": [-933, -292], "road": "Honeysuckle Avenue", "clearRadius": 26, "label": "Home" },
+  "wawa": { "lot": [-658, -148], "road": "West Pike Street", "clearRadius": 32, "label": "Wawa" },
+  "school": { "lot": [832, 545], "road": "New Hope Road", "clearRadius": 55, "label": "Red Clay High" },
+  "square": { "spot": [0, 0], "road": "East Crogan Street", "label": "Courthouse Square" }
 }

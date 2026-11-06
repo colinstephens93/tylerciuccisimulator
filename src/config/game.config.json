@@ -1,17 +1,11 @@
 {
+  "townName": "Lawrenceville",
   "schoolName": "Red Clay High School",
   "schoolMascot": "Foxes",
-  "townName": "Lawrenceville",
-  "startTime": "07:00",
-  "firstBell": "08:00",
-  "clockSpeed": 12,
-  "favoriteGhostFlavor": "Root Beer",
-  "wawaGoals": { "minCalories": 1000, "minCaffeineMg": 300 },
-  "ghostCaffeineMg": 300,
-  "minCaloriesPerFoodItem": 500,
-  "orderPrepMinutes": 3,
-  "collisionPenaltyMinutes": 1,
   "spouseName": "Amanda",
-  "amandaCallsPerRun": [3, 4],
-  "patrolCar": { "doorText": "SHERIFF", "bodyColor": "#1b1f2a", "doorColor": "#f2f2f2" }
+  "favoriteGhostFlavor": "Root Beer",
+  "patrolCar": { "doorText": "SHERIFF", "bodyColor": "#1b1f2a", "doorColor": "#f2f2f2" },
+  "player": { "walkSpeed": 5, "runSpeed": 10, "jumpSpeed": 9, "ghostRushSeconds": 6 },
+  "world": { "trafficCars": 14, "pedestrians": 18, "hiddenCans": 20, "propSpacing": 26 },
+  "graphics": { "maxPixelRatio": 2 }
 }

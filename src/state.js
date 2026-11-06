@@ -1,7 +1,5 @@
-// Single shared game state for a run, plus saved settings.
+// Saved progress (coins, hidden Ghost cans, mission records) and settings, in localStorage.
 import config from './config/game.config.json';
-import { GameClock } from './logic/clock.js';
-import { planCalls, CALL_TRIGGERS } from './logic/amanda.js';
 
 function load(key, fallback) {
   try {
@@ -16,66 +14,58 @@ function save(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    /* storage unavailable: settings just won't persist */
+    /* storage unavailable: progress just won't persist */
   }
 }
 
-// Fields copied into a checkpoint so "Retry this scene" can rewind.
-const RUN_FIELDS = [
-  'inventory', 'infractions', 'amandaMood', 'declinedLast', 'callsDone',
-  'showTray', 'order', 'orderCounter', 'arrivalMinutes',
-];
+const FRESH = () => ({ coins: 0, cans: [], missions: {}, seenIntro: false });
 
 export const state = {
   config,
   settings: load('tcs.settings', { music: true, sfx: true }),
-  best: load('tcs.best', { score: 0 }),
-
-  newRun() {
-    this.clock = new GameClock(config);
-    this.inventory = [];
-    this.infractions = 0;
-    this.amandaMood = 0;
-    this.declinedLast = false;
-    this.callPlan = planCalls(CALL_TRIGGERS, config.amandaCallsPerRun);
-    this.callsDone = [];
-    this.showTray = false;
-    this.order = null;
-    this.orderCounter = 40 + Math.floor(Math.random() * 50);
-    this.arrivalMinutes = null;
-    this.stepIndex = 0;
-    this.checkpoint = null;
-    this.clockRunning = false;
-    this.inputLocked = false;
-    this.objective = '';
-  },
-
-  saveCheckpoint() {
-    const snap = { minutes: this.clock.minutes, stepIndex: this.stepIndex };
-    for (const f of RUN_FIELDS) snap[f] = structuredClone(this[f]);
-    this.checkpoint = snap;
-  },
-
-  restoreCheckpoint() {
-    const snap = this.checkpoint;
-    this.clock.minutes = snap.minutes;
-    this.stepIndex = snap.stepIndex;
-    for (const f of RUN_FIELDS) this[f] = structuredClone(snap[f]);
-    this.inputLocked = false;
-  },
+  save: load('tcs.save', FRESH()),
 
   saveSettings() {
     save('tcs.settings', this.settings);
   },
 
-  recordScore(score) {
-    if (score > this.best.score) {
-      this.best = { score };
-      save('tcs.best', this.best);
-      return true;
-    }
-    return false;
+  persist() {
+    save('tcs.save', this.save);
+  },
+
+  addCoins(n) {
+    this.save.coins = Math.max(0, this.save.coins + n);
+    this.dirty = true;
+  },
+
+  collectCan(id) {
+    if (this.save.cans.includes(id)) return false;
+    this.save.cans.push(id);
+    this.persist();
+    return true;
+  },
+
+  // Returns true if this is a new best time.
+  recordMission(id, seconds) {
+    const rec = this.save.missions[id] || { done: 0, best: null };
+    rec.done++;
+    const isBest = rec.best === null || seconds < rec.best;
+    if (isBest) rec.best = Math.round(seconds * 10) / 10;
+    this.save.missions[id] = rec;
+    this.persist();
+    return isBest;
+  },
+
+  resetSave() {
+    this.save = FRESH();
+    this.persist();
   },
 };
 
-state.newRun();
+// Coins change often; write them out every few seconds rather than every pickup.
+setInterval(() => {
+  if (state.dirty) {
+    state.dirty = false;
+    state.persist();
+  }
+}, 4000);

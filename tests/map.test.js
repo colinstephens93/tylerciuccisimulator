@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import map from '../src/data/lawrenceville.json';
-import { buildGraph, route, sampleAt, polylineLength, smoothPath, resample, turnSpeedCaps } from '../src/map/graph.js';
-import { computePlaces, driveRoute } from '../src/map/places.js';
+import { buildGraph, route, polylineLength } from '../src/map/graph.js';
+import { computePlaces, gpsRoute } from '../src/map/places.js';
+import { buildLaneNet, TRAFFIC_TYPES, WALK_TYPES, nextEdge, edgePose, nodeInRing, laneOffset } from '../src/sim/roadnet.js';
 
 describe('Lawrenceville map data', () => {
   it('has roads, buildings, and OSM attribution', () => {
@@ -11,29 +12,37 @@ describe('Lawrenceville map data', () => {
   });
 });
 
-describe('routing', () => {
+describe('places and GPS routing', () => {
   const { graph, places } = computePlaces(map);
 
-  it('places each location next to its named road', () => {
+  it('places each location next to its named road, with a marker spot', () => {
     for (const p of Object.values(places)) {
       expect(Math.hypot(p.road[0] - p.x, p.road[1] - p.z)).toBeLessThan(80);
+      expect(p.marker).toHaveLength(2);
+      expect(p.label).toBeTruthy();
     }
   });
 
-  it('home -> Wawa uses West Pike Street and is a reasonable drive', () => {
-    const r = driveRoute(graph, places.home, places.wawa);
-    expect(r).not.toBeNull();
-    expect(r.roads).toContain('West Pike Street');
-    const len = polylineLength(r.points);
-    expect(len).toBeGreaterThan(400);
-    expect(len).toBeLessThan(2500);
+  it('routes between every pair of places along real streets', () => {
+    for (const a of Object.values(places)) {
+      for (const b of Object.values(places)) {
+        if (a === b) continue;
+        const r = route(graph, a.roadV, b.roadV);
+        expect(r, `${a.key} -> ${b.key}`).not.toBeNull();
+        expect(polylineLength(r.points)).toBeLessThan(3500);
+      }
+    }
   });
 
-  it('Wawa -> school reaches New Hope Road', () => {
-    const r = driveRoute(graph, places.wawa, places.school);
-    expect(r).not.toBeNull();
+  it('home -> school passes through town on New Hope Road', () => {
+    const r = route(graph, places.home.roadV, places.school.roadV);
     expect(r.roads).toContain('New Hope Road');
-    expect(polylineLength(r.points)).toBeLessThan(3500);
+  });
+
+  it('GPS route starts at the player and ends at the marker', () => {
+    const pts = gpsRoute(graph, -900, -250, places.wawa);
+    expect(pts[0]).toEqual([-900, -250]);
+    expect(pts[pts.length - 1]).toEqual(places.wawa.marker);
   });
 
   it('respects one-way streets', () => {
@@ -41,40 +50,54 @@ describe('routing', () => {
     expect(route(g, 0, 1)).not.toBeNull();
     expect(route(g, 1, 0)).toBeNull();
   });
+});
 
-  it('samples positions along a polyline', () => {
-    const p = sampleAt([[0, 0], [10, 0], [10, 10]], 15);
-    expect(p.x).toBeCloseTo(10);
-    expect(p.z).toBeCloseTo(5);
+describe('lane network for traffic and pedestrians', () => {
+  const drive = buildLaneNet(map, { types: TRAFFIC_TYPES, oneWay: true });
+  const walk = buildLaneNet(map, { types: WALK_TYPES, oneWay: false });
+
+  it('has plenty of nodes and keeps traffic off parking aisles', () => {
+    expect(drive.nodes.length).toBeGreaterThan(1000);
+    for (const v of drive.nodes) for (const e of drive.out[v]) expect(e.road.t).not.toBe('service');
   });
 
-  it('smoothing rounds corners but keeps endpoints and straight roads', () => {
-    const sharp = [[0, 0], [100, 0], [100, 100]];
-    const smooth = smoothPath(sharp);
-    expect(smooth[0]).toEqual([0, 0]);
-    expect(smooth[smooth.length - 1]).toEqual([100, 100]);
-    // Never strays far from the real corner
-    for (const [x, z] of smooth) expect(Math.min(Math.abs(z), Math.abs(x - 100))).toBeLessThan(7);
+  it('pedestrians may walk both ways down one-way streets', () => {
+    const tiny = { verts: [0, 0, 10, 0], roads: [{ t: 'residential', w: 8, n: 'A', ow: 1, v: [0, 1] }] };
+    expect(buildLaneNet(tiny, { types: WALK_TYPES, oneWay: true }).out[1]).toHaveLength(0);
+    expect(buildLaneNet(tiny, { types: WALK_TYPES, oneWay: false }).out[1]).toHaveLength(1);
+    expect(walk.nodes.length).toBeGreaterThanOrEqual(drive.nodes.length);
   });
 
-  it('drive routes slow the car for sharp turns (no fast whipping around corners)', () => {
-    const MAX = 38;
-    for (const r of [driveRoute(graph, places.home, places.wawa), driveRoute(graph, places.wawa, places.school)]) {
-      const caps = turnSpeedCaps(r.points, MAX);
-      for (let i = 2; i < r.points.length; i++) {
-        const a1 = Math.atan2(r.points[i - 1][0] - r.points[i - 2][0], r.points[i - 1][1] - r.points[i - 2][1]);
-        const a2 = Math.atan2(r.points[i][0] - r.points[i - 1][0], r.points[i][1] - r.points[i - 1][1]);
-        const turn = Math.abs(Math.atan2(Math.sin(a2 - a1), Math.cos(a2 - a1)));
-        // Heading change per second at the capped speed stays under ~3 rad/s.
-        expect((turn / 2) * caps[i - 1]).toBeLessThan(3.2);
+  it('nextEdge continues from the end of the edge and avoids U-turns when it can', () => {
+    let checked = 0;
+    for (const v of drive.nodes.slice(0, 400)) {
+      for (const e of drive.out[v]) {
+        const n = nextEdge(drive, e, () => 0.5);
+        if (!n) continue;
+        expect(n.from).toBe(e.to);
+        if (drive.out[e.to].some((x) => x.to !== e.from)) expect(n.to).not.toBe(e.from);
+        checked++;
       }
-      expect(Math.max(...caps)).toBeGreaterThan(MAX * 0.9); // straights stay fast
     }
+    expect(checked).toBeGreaterThan(100);
   });
 
-  it('resamples at even spacing', () => {
-    const pts = resample([[0, 0], [10, 0]], 2);
-    expect(pts.length).toBe(6);
-    expect(pts[1][0]).toBeCloseTo(2);
+  it('cars drive on the right-hand side of two-way roads', () => {
+    const net = buildLaneNet({ verts: [0, 0, 0, 100], roads: [{ t: 'residential', w: 8, n: 'A', ow: 0, v: [0, 1] }] }, { types: TRAFFIC_TYPES, oneWay: true });
+    const south = net.out[0][0]; // heading +z (south): right-hand side is west (-x)
+    const p = edgePose(net, south, 50, laneOffset(south.road));
+    expect(p.x).toBeLessThan(0);
+    expect(p.z).toBeCloseTo(50);
+  });
+
+  it('finds spawn nodes in a ring around the player', () => {
+    for (let k = 0; k < 20; k++) {
+      const v = nodeInRing(drive, 0, 0, 90, 230);
+      expect(v).toBeGreaterThanOrEqual(0);
+      const d = Math.hypot(map.verts[2 * v], map.verts[2 * v + 1]);
+      expect(d).toBeGreaterThanOrEqual(90);
+      expect(d).toBeLessThanOrEqual(230);
+    }
+    expect(nodeInRing(drive, 99999, 99999, 0, 50)).toBe(-1);
   });
 });

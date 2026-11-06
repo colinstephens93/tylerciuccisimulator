@@ -4,25 +4,24 @@
 
 Phaser prototype that proved out the rules: clock, Wawa goals, Amanda calls, scoring, audio.
 
-## Milestone 2 - 3D on real Lawrenceville streets (done)
+## Milestone 2 - 3D Morning Run on real streets (done, replaced)
 
-- Three.js engine: tilted follow camera, drag to rotate, pinch to zoom, tap to walk.
-- Real Lawrenceville roads, buildings, parks and water from OpenStreetMap; real routing.
-- 3D Tyler (from the reference photo), marked patrol car, traffic, school bus, crossing guard.
-- 3D house, Wawa (with fuel canopy), school (with marquee and flagpole), Wawa interior.
-- Driving on the real route with lanes, brake, traffic, school zone, Lights.
-- Same rules as before: 7:00 start, 8:00 bell, Wawa goals, Amanda calls, scoring, retry.
+Three.js on OpenStreetMap streets; on-rails drives, Wawa interior, 8:00 bell.
 
-## Milestone 3 - Polish (next)
+## Milestone 3 - Free-roam sandbox (done)
 
-- Playtest on real phones; tune clock speed, car speed, traffic density, infraction penalty.
-- Street name labels while driving; turn-by-turn style hints.
-- More detailed Tyler model and animations (phone check, drinking a Ghost).
-- Landmarks: Gwinnett historic courthouse on the square, a few recognizable downtown buildings.
-- Time-of-day lighting (sunrise glow at 7:00).
-- Loading performance on older phones.
+- Virtual joystick + action buttons, chase camera with wall avoidance and shake.
+- Free driving with arcade physics, drifting, collisions; take any car.
+- AI traffic on real lanes, pedestrians, breakable props, coins.
+- Heat meter and Sarge pursuit.
+- Five data-driven missions; 20 hidden Ghost cans; saved progress.
+- Mini-map, mission card, slam-in banners; bright cartoon restyle.
 
-## Later
+## Next
 
-- Workday scenes at school (hallway patrol, lunch duty, car-rider line).
-- More Amanda calls.
+- Playtest on real iPhones: tune car handling, joystick feel, traffic density, mission timers, heat rates.
+- More missions (car-rider line, escort the school bus, races).
+- Jumps and ramps; a few landmark buildings (courthouse, downtown storefronts).
+- Time-of-day lighting; simple day progression.
+- Outfit / car unlocks to spend coins on.
+- Performance pass for older phones (lower pixel ratio, fewer peds automatically).

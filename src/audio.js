@@ -6,6 +6,8 @@ let master;
 let musicGain;
 let sfxGain;
 let ducked = false;
+let engineOsc = null;
+let engineGain = null;
 
 const NOTE_INDEX = { C: 0, 'C#': 1, D: 2, 'D#': 3, E: 4, F: 5, 'F#': 6, G: 7, 'G#': 8, A: 9, 'A#': 10, B: 11 };
 function noteFreq(name) {
@@ -31,10 +33,10 @@ const TRACKS = {
     lead: 'A4 C5 E5 A5 G5 E5 C5 E5 F4 A4 C5 F5 E5 C5 A4 C5 G4 B4 D5 G5 F5 D5 B4 D5 E4 G#4 B4 E5 D5 B4 G#4 B4',
     bass: 'A2 . A3 A2 . A2 A3 . F2 . F3 F2 . F2 F3 . G2 . G3 G2 . G2 G3 . E2 . E3 E2 . E2 E3 .',
   },
-  wawa: {
-    bpm: 112, leadWave: 'triangle',
-    lead: 'G4 . B4 . D5 . B4 . C5 . E5 . G5 . E5 . A4 . C5 . E5 . C5 . D5 . F#5 . A5 . . .',
-    bass: 'G2 . . . D3 . . . C3 . . . G2 . . . A2 . . . E3 . . . D3 . . . D2 . . .',
+  mission: {
+    bpm: 150, leadWave: 'square',
+    lead: 'E5 . E5 G5 . E5 D5 . C5 . C5 D5 E5 . . . A4 . A4 C5 . A4 G4 . A4 . C5 D5 E5 . D5 .',
+    bass: 'A2 A2 . A2 E3 . A2 . F2 F2 . F2 C3 . F2 . D2 D2 . D2 A2 . D2 . E2 E2 . E2 B2 . G#2 .',
   },
 };
 
@@ -75,17 +77,24 @@ const SFX = {
   carDoor: () => { noise(0.08, { vol: 0.5 }); tone(90, 0.12, { vol: 0.5 }); },
   chime: () => { tone(1046, 0.3, { type: 'triangle' }); tone(784, 0.5, { type: 'triangle', delay: 0.25 }); },
   crash: () => { noise(0.35, { vol: 0.6 }); tone(160, 0.3, { slideTo: 50, vol: 0.5 }); },
-  horn: () => { tone(400, 0.3, { vol: 0.3 }); tone(500, 0.3, { vol: 0.3 }); },
-  siren: () => { for (let i = 0; i < 3; i++) tone(700, 0.45, { slideTo: 1100, vol: 0.25, delay: i * 0.45 }); },
-  ready: () => [0, 0.15, 0.3].forEach((d) => tone(1320, 0.1, { vol: 0.3, delay: d })),
-  cooler: () => { noise(0.15, { vol: 0.25 }); tone(220, 0.2, { type: 'triangle', vol: 0.3 }); },
+  thud: () => { noise(0.12, { vol: 0.35 }); tone(110, 0.15, { slideTo: 60, vol: 0.4 }); },
+  horn: () => { tone(400, 0.3, { vol: 0.3 }); tone(505, 0.3, { vol: 0.3 }); },
+  siren: () => { tone(700, 0.6, { slideTo: 1100, vol: 0.2 }); tone(1100, 0.6, { slideTo: 700, vol: 0.2, delay: 0.6 }); },
   gulp: () => { noise(0.05, { vol: 0.4 }); tone(320, 0.12, { slideTo: 140, delay: 0.15 }); tone(300, 0.12, { slideTo: 130, delay: 0.35 }); },
-  register: () => { tone(1500, 0.08, { vol: 0.3 }); tone(1500, 0.08, { vol: 0.3, delay: 0.12 }); },
-  bell: () => { for (let i = 0; i < 20; i++) tone(i % 2 ? 1250 : 1180, 0.05, { vol: 0.25, delay: i * 0.05 }); },
-  ring: () => [0, 0.12, 0.24, 0.36].forEach((d, i) => tone(i % 2 ? 1600 : 1300, 0.1, { vol: 0.25, delay: d })),
   ding: () => tone(1568, 0.4, { type: 'triangle', vol: 0.4 }),
-  win: () => ['C5', 'E5', 'G5', 'C6'].forEach((n, i) => tone(noteFreq(n), 0.2, { vol: 0.35, delay: i * 0.12 })),
-  tardy: () => ['G4', 'F#4', 'F4', 'E4'].forEach((n, i) => tone(noteFreq(n), i === 3 ? 0.8 : 0.3, { type: 'triangle', vol: 0.4, delay: i * 0.3 })),
+  coin: () => { tone(988, 0.06, { vol: 0.25 }); tone(1319, 0.14, { vol: 0.25, delay: 0.06 }); },
+  can: () => ['C5', 'E5', 'G5', 'C6', 'E6'].forEach((n, i) => tone(noteFreq(n), 0.1, { type: 'triangle', vol: 0.35, delay: i * 0.05 })),
+  smash: () => { noise(0.18, { vol: 0.45 }); tone(300, 0.15, { slideTo: 90, vol: 0.35, type: 'triangle' }); },
+  kick: () => { noise(0.06, { vol: 0.3 }); tone(220, 0.08, { slideTo: 120, vol: 0.3 }); },
+  jump: () => tone(300, 0.15, { slideTo: 700, vol: 0.25, type: 'triangle' }),
+  land: () => { noise(0.05, { vol: 0.2 }); tone(120, 0.06, { vol: 0.25 }); },
+  bonk: () => { tone(520, 0.1, { slideTo: 260, vol: 0.4, type: 'triangle' }); tone(900, 0.3, { slideTo: 300, vol: 0.2, delay: 0.08 }); },
+  hey: () => { tone(350, 0.12, { slideTo: 520, vol: 0.2, type: 'sawtooth' }); tone(520, 0.15, { slideTo: 400, vol: 0.2, type: 'sawtooth', delay: 0.12 }); },
+  start: () => ['G4', 'C5', 'E5', 'G5'].forEach((n, i) => tone(noteFreq(n), 0.12, { vol: 0.3, delay: i * 0.08 })),
+  win: () => ['C5', 'E5', 'G5', 'C6', 'G5', 'C6'].forEach((n, i) => tone(noteFreq(n), i > 3 ? 0.3 : 0.15, { vol: 0.35, delay: i * 0.1 })),
+  fail: () => ['G4', 'F#4', 'F4', 'E4'].forEach((n, i) => tone(noteFreq(n), i === 3 ? 0.8 : 0.3, { type: 'triangle', vol: 0.4, delay: i * 0.3 })),
+  busted: () => { for (let i = 0; i < 4; i++) tone(i % 2 ? 600 : 900, 0.18, { vol: 0.3, delay: i * 0.18 }); },
+  alarm: () => { for (let i = 0; i < 6; i++) tone(i % 2 ? 660 : 990, 0.12, { vol: 0.25, delay: i * 0.12 }); },
 };
 
 function schedule() {
@@ -151,6 +160,28 @@ export const audio = {
 
   setTempo(scale) {
     music.tempo = scale;
+  },
+
+  // Continuous engine hum; pitch follows speed (0..1). Pass null to stop it.
+  engine(level) {
+    if (!ctx) return;
+    if (level === null) {
+      if (engineOsc) { engineGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05); }
+      return;
+    }
+    if (!engineOsc) {
+      engineOsc = ctx.createOscillator();
+      engineOsc.type = 'sawtooth';
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 500;
+      engineGain = ctx.createGain();
+      engineGain.gain.value = 0;
+      engineOsc.connect(lp).connect(engineGain).connect(sfxGain);
+      engineOsc.start();
+    }
+    engineOsc.frequency.setTargetAtTime(45 + level * 110, ctx.currentTime, 0.08);
+    engineGain.gain.setTargetAtTime(0.08 + level * 0.07, ctx.currentTime, 0.08);
   },
 
   duck(on) {

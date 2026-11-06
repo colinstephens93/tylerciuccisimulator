@@ -1,0 +1,60 @@
+[
+  {
+    "id": "morning-run",
+    "title": "The Morning Run",
+    "start": "home",
+    "from": "Amanda",
+    "brief": "Babe, you overslept AGAIN. Grab breakfast and a Ghost at Wawa, then get to school before the bell!",
+    "stages": [
+      { "type": "reach", "target": "wawa", "time": 45, "text": "Get to Wawa", "done": "Two breakfast sandwiches and a Root Beer Ghost. Breakfast of champions." },
+      { "type": "reach", "target": "school", "time": 100, "text": "Beat the first bell", "done": "Made it before the bell!" }
+    ],
+    "reward": 100
+  },
+  {
+    "id": "ghost-hunt",
+    "title": "Ghost Hunt",
+    "start": "wawa",
+    "from": "Wawa Clerk",
+    "brief": "Deputy! The Ghost delivery truck hit a pothole and cans went everywhere. Round up 8 before they get warm!",
+    "stages": [
+      { "type": "collect", "count": 8, "radius": 220, "time": 120, "text": "Grab the spilled Ghost cans" }
+    ],
+    "reward": 120
+  },
+  {
+    "id": "speed-trap",
+    "title": "Speed Trap",
+    "start": "square",
+    "from": "Sarge",
+    "brief": "Some joker in a yellow coupe is doing 60 around the square. Ram him three times and he'll give up. Don't lose him.",
+    "stages": [
+      { "type": "pursuit", "hits": 3, "time": 100, "text": "Ram the yellow coupe" }
+    ],
+    "reward": 150
+  },
+  {
+    "id": "pep-rally",
+    "title": "Pep Rally",
+    "start": "school",
+    "from": "Coach",
+    "brief": "Big game tonight, Ciucci! Get the town hyped. Knock over 15 things in 60 seconds. The principal did not hear this.",
+    "stages": [
+      { "type": "smash", "count": 15, "time": 60, "text": "Smash street stuff" }
+    ],
+    "reward": 100
+  },
+  {
+    "id": "honey-do",
+    "title": "Honey-Do List",
+    "start": "home",
+    "from": "Amanda",
+    "brief": "Since you're out anyway: my Wawa coffee, then flowers from the square, then come home. Love you!",
+    "stages": [
+      { "type": "reach", "target": "wawa", "time": 45, "text": "Get Amanda's coffee at Wawa", "done": "One large coffee, extra cream." },
+      { "type": "reach", "target": "square", "time": 55, "text": "Grab flowers at the square", "done": "Got the flowers. Nice." },
+      { "type": "reach", "target": "home", "time": 75, "text": "Bring it all home" }
+    ],
+    "reward": 130
+  }
+]
