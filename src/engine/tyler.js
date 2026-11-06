@@ -9,7 +9,7 @@ import { blobShadow, rigCharacter, starShape } from './models.js';
 
 const matCache = new Map();
 // Physically based material (soft, slightly rough) so Tyler reads as "real" next to the toon world.
-function pbr(color, { rough = 0.8, metal = 0, emissive = 0 } = {}) {
+export function pbr(color, { rough = 0.8, metal = 0, emissive = 0 } = {}) {
   const key = `${color}|${rough}|${metal}|${emissive}`;
   if (!matCache.has(key)) matCache.set(key, new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal, emissive }));
   return matCache.get(key);
@@ -31,17 +31,17 @@ const C = {
   red: 0xe5392b,
 };
 
-function part(geo, mat, x = 0, y = 0, z = 0, parent = null) {
+export function part(geo, mat, x = 0, y = 0, z = 0, parent = null) {
   const m = new THREE.Mesh(geo, mat);
   m.position.set(x, y, z);
   parent?.add(m);
   return m;
 }
 
-const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
-const cyl = (rt, rb, h, seg = 16) => new THREE.CylinderGeometry(rt, rb, h, seg);
-const sph = (r, ws = 20, hs = 14, ...cut) => new THREE.SphereGeometry(r, ws, hs, ...cut);
-const cap = (r, len, seg = 16) => new THREE.CapsuleGeometry(r, len, 6, seg);
+export const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
+export const cyl = (rt, rb, h, seg = 16) => new THREE.CylinderGeometry(rt, rb, h, seg);
+export const sph = (r, ws = 20, hs = 14, ...cut) => new THREE.SphereGeometry(r, ws, hs, ...cut);
+export const cap = (r, len, seg = 16) => new THREE.CapsuleGeometry(r, len, 6, seg);
 
 function buildHead(head) {
   const skin = pbr(C.skin, { rough: 0.65 });

@@ -48,3 +48,4 @@
 | 44 | 2026-11-06 | Keep the full real Lawrenceville map; only simulate traffic and people near the player | Recognizable town; phone performance |
 | 45 | 2026-11-06 | Tyler uses a detailed, realistically proportioned model (mustache, plate carrier, short sleeves) matching the reference photo; the rest of the world stays cartoon | User request: Tyler should look much more like the photo |
 | 46 | 2026-11-06 | The Morning Run starts with a stop at El Cregs (flauta food truck on West Pike Street) to meet ATF Agent Dan on foot, before Wawa | User request; adds a `meet` stage type |
+| 47 | 2026-11-06 | Dan gets a realistic model matching his reference photos (Tyler's style, a bit larger); photos are not committed | User request |
