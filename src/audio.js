@@ -103,12 +103,24 @@ function schedule() {
   const lead = tr.lead.split(' ');
   const bass = tr.bass.split(' ');
   const stepDur = 60 / (tr.bpm * music.tempo) / 2;
+  // After a stall (slow frame, backgrounded tab) skip the missed notes instead of
+  // playing them all at once.
+  if (music.nextTime < ctx.currentTime - 0.05) {
+    const missed = Math.ceil((ctx.currentTime - music.nextTime) / stepDur);
+    music.step += missed;
+    music.nextTime += missed * stepDur;
+  }
   while (music.nextTime < ctx.currentTime + 0.12) {
     const i = music.step % lead.length;
     const delay = Math.max(0, music.nextTime - ctx.currentTime);
-    if (lead[i] !== '.') tone(noteFreq(lead[i]), stepDur * 0.9, { type: tr.leadWave, vol: 0.35, delay, dest: musicGain });
+    if (lead[i] !== '.') tone(noteFreq(lead[i]), stepDur * 0.9, { type: tr.leadWave, vol: tr.leadWave === 'triangle' ? 0.55 : 0.35, delay, dest: musicGain });
     const b = bass[i % bass.length];
-    if (b !== '.') tone(noteFreq(b), stepDur * 1.6, { type: 'triangle', vol: 0.5, delay, dest: musicGain });
+    if (b !== '.') {
+      const f = noteFreq(b);
+      tone(f, stepDur * 1.6, { type: 'triangle', vol: 0.5, delay, dest: musicGain });
+      // Octave-up layer so the bass line is audible on small phone speakers.
+      tone(f * 2, stepDur * 1.2, { type: 'square', vol: 0.12, delay, dest: musicGain });
+    }
     music.nextTime += stepDur;
     music.step++;
   }
@@ -128,13 +140,22 @@ export const audio = {
       musicGain.connect(master);
       sfxGain.connect(master);
       this.applySettings();
+      const silent = ctx.createBufferSource();
+      silent.buffer = ctx.createBuffer(1, 1, 22050);
+      silent.connect(ctx.destination);
+      silent.start(0);
+      // iOS suspends ("interrupted") audio after a phone call or app switch; the next
+      // touch or return to the page brings it back.
+      const wake = () => { if (ctx.state !== 'running') ctx.resume(); };
+      for (const ev of ['pointerdown', 'touchend', 'keydown']) window.addEventListener(ev, wake, { passive: true });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) wake(); });
     }
-    if (ctx.state === 'suspended') ctx.resume();
+    if (ctx.state !== 'running') ctx.resume();
   },
 
   applySettings() {
     if (!ctx) return;
-    musicGain.gain.value = state.settings.music ? 0.16 * (ducked ? 0.3 : 1) : 0;
+    musicGain.gain.value = state.settings.music ? 0.22 * (ducked ? 0.3 : 1) : 0;
     sfxGain.gain.value = state.settings.sfx ? 0.45 : 0;
   },
 

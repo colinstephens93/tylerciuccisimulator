@@ -1,6 +1,7 @@
 import './style.css';
 import { Game } from './game.js';
 import { state } from './state.js';
+import { audio } from './audio.js';
 
 const game = new Game();
 game.load();
@@ -8,3 +9,4 @@ game.load();
 // Handy for debugging in the browser console.
 window.__game = game;
 window.__state = state;
+window.__audio = audio;
